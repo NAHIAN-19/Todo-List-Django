@@ -1,4 +1,4 @@
-                                                                    TODO_LIST
+Todo list django
 OVERVIEW : 
 ![Screenshot (233)](https://github.com/NAHIAN-19/TODO_LIST/assets/106859103/402961c4-6979-414f-84df-09fee08c788c)
 ![Screenshot (234)](https://github.com/NAHIAN-19/TODO_LIST/assets/106859103/fecca433-88a5-4aa6-aa67-8a8a9ae286dd)
