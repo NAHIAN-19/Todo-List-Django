@@ -27,7 +27,7 @@ To get started with the Todo_List Django Web App, you can clone the repository f
    
 2. Navigate to the project folder:
    ```bash
-   cd Todo-List-Django
+   cd Todo_List
    
 3. Create and activate a virtual environment (optional but recommended):
    ```bash
