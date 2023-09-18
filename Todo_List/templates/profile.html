@@ -1,0 +1,155 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Profile</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-KK94CHFLLe+nY2dmCWGMq91rCGa5gtU4mk92HdvYe+M/SXH301p5ILy+dN9+nJOZ" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}">
+</head>
+<body>
+    {% include 'base.html' %}
+    <div class="profile-section">
+        <div class="profile-picture">
+            <img src="{{ user.profile.profile_picture.url }}" class="rounded-circle" width="200" height="200" alt="Profile Picture">
+        </div>
+        <div class="profile-details">
+            <h3 class="username">{{ user.username }}</h3>
+            <p class="completed-tasks">Total Completed Tasks : {{ user.profile.completed_tasks_count }}</p>
+        </div>
+    </div>
+    
+    <div class="container my-3">
+        <h2 class="text-center">Profile</h2>
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="mb-3">
+                <label for="id_profile_picture" class="form-label" style="margin-top: 50px">Profile Picture:</label>
+                <input type="file" class="form-control" name="profile_picture" id="id_profile_picture">
+                {% if form.profile_picture.errors %}
+                    <div class="errors">
+                        {% for error in form.profile_picture.errors %}
+                            <p>{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+            <div class="mb-3">
+                <label for="id_email" class="form-label">Email:</label>
+                <input type="email" class="form-control" name="email" id="id_email" value="{{ form.email.value }}">
+                {% if form.email.errors %}
+                    <div class="errors">
+                        {% for error in form.email.errors %}
+                            <p>{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+            <div class="mb-3">
+                <label for="change_password" class="form-label">Change Password:</label>
+                <select class="form-select" name="change_password" id="change_password">
+                    <option value="no_change">No Change</option>
+                    <option value="change">Change Password</option>
+                </select>
+            </div>
+            <div id="password_fields" style="display: none;">
+                <div class="mb-3">
+                    <label for="id_old_password" class="form-label">Old Password:</label>
+                    <input type="password" class="form-control" name="old_password" id="id_old_password">
+                    {% if password_form.old_password.errors %}
+                        <div class="errors">
+                            {% for error in password_form.old_password.errors %}
+                                <p>{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+                <div class="mb-3">
+                    <label for="id_new_password1" class="form-label">New Password:</label>
+                    <input type="password" class="form-control" name="new_password1" id="id_new_password1">
+                    {% if password_form.new_password1.errors %}
+                        <div class="errors">
+                            {% for error in password_form.new_password1.errors %}
+                                <p>{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+                <div class="mb-3">
+                    <label for="id_new_password2" class="form-label">Confirm New Password:</label>
+                    <input type="password" class="form-control" name="new_password2" id="id_new_password2">
+                    {% if password_form.new_password2.errors %}
+                        <div class="errors">
+                            {% for error in password_form.new_password2.errors %}
+                                <p>{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            <button type="submit" class="btn btn-primary btn-add" style = "background-color:#0DBEF3;">Save</button>
+        </form>
+        <br>
+        <form method="POST" action="{% url 'delete_account' user.id %}">
+            {% csrf_token %}
+            <div class="mb-3">
+                <label for="confirm" class="form-label">Option :</label>
+                <select class="form-select" name="confirm" id="confirm">
+                    <option value="no_change">No Change</option>
+                    <option value="delete_account">DELETE  ACCOUNT</option>
+                </select>
+            </div>
+            <div id="delete_account" style="display: none;">
+                <div class="mb-3">
+                    <label for="confirm" class="form-label" style="color:#EC7063;">WARNING : This action can't be reversed, type "CONFIRM" to delete account.</label>
+                    <input type="text" class="form-control" name="confirm" id="confirm">
+                </div>
+            </div>
+            <button type="submit" class="btn btn-danger">Delete Account</button>
+        </form>
+        {% if messages %}
+            {% for message in messages %}
+                {% if message.tags == 'success' %}
+                    <div class="alert alert-success" role="alert">
+                        {{ message }}
+                    </div>
+                {% endif %}
+            {% endfor %}
+        {% endif %}
+    </div>
+    
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $("#change_password").change(function() {
+                var passwordFields = $("#password_fields");
+                console.log($(this).val())
+                if ($(this).val() === "change") {
+                    passwordFields.show();
+                    passwordFields.find("input").prop("required", true);
+                } else {
+                    passwordFields.hide();
+                    passwordFields.find("input").prop("required", false);
+                }
+            });
+        });
+    </script>
+    <script>
+        $(document).ready(function() {
+            $("#confirm").change(function() {
+                var deleteAccount = $("#delete_account");
+                console.log($(this).val())
+                if ($(this).val() === "delete_account") {
+                    deleteAccount.show();
+                    deleteAccount.find("input").prop("required", true);
+                } else {
+                    deleteAccount.hide();
+                    deleteAccount.find("input").prop("required", false);
+                }
+            });
+        });
+    </script>
+</body>
+</html>
