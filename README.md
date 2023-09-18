@@ -52,7 +52,7 @@ To get started with the Todo_List Django Web App, you can clone the repository f
 8. Open your web browser and go to http://localhost:8000 to access the Todo_List Django Web App.
 ### Installing from ZIP Archive
 
-1. Download the zip file <a href="https://github.com/NAHIAN-19/Todo-List-Django/blob/main/nobels.zip">Todo_List.zip</a>
+1. Download the zip file <a href="https://github.com/NAHIAN-19/Todo-List-Django/blob/main/Todo_List.zip">Todo_List.zip</a>
 2. Extract the ZIP archive to your desired location on your computer.
 4. Navigate to the project folder:
    --Right click on the project folder and 'Copy as path' and paste the path like below
