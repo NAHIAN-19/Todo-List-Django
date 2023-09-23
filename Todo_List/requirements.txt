@@ -19,7 +19,6 @@ prompt-toolkit==3.0.38
 pydantic==1.10.8
 python-dateutil==2.8.2
 python-pptx==0.6.21
-pywin32==306
 redis==4.5.5
 requests==2.31.0
 six==1.16.0
