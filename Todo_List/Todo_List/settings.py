@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-4b6b=)mz3awe1n=z+wcyol1z8^c5f(u1l%u&%hr^bu==d0%z)x
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = []
 
 
 # Application definition
@@ -39,7 +39,6 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'Todo_List_App',
-    'corsheaders',
 ]
 
 MIDDLEWARE = [
@@ -123,16 +122,9 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 MEDIA_URL = '/media/'
 
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
-CORS_ALLOW_ALL_ORIGINS = True
-CORS_ALLOWED_ORIGINS = [
-    "https://todo-list--nahiannazeeb19.repl.co",
-]
-CORS_ALLOW_CREDENTIALS = True
-CSRF_TRUSTED_ORIGINS = ['https://todo-list--nahiannazeeb19.repl.co']
