@@ -1,6 +1,7 @@
 from django.contrib.auth.models import User, AbstractUser
 from django.db import models
 from django.utils import timezone
+import os
 
 
 class Task(models.Model):
@@ -30,9 +31,11 @@ class CompletedTask(models.Model):
     def __str__(self):
         return self.task.taskTitle
 
+def profile_picture_path(instance, filename):
+    return os.path.join('profile_pictures', str(instance.user.id), filename)
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    profile_picture = models.ImageField(upload_to='profile_pictures', default='profile_pictures\default.jpg')
+    profile_picture = models.ImageField(upload_to=profile_picture_path, default='profile_pictures/default.jpg')
     completed_tasks_count = models.PositiveIntegerField(default=0)
 
     def update_completed_tasks_count(self):
