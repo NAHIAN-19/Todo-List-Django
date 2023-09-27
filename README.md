@@ -39,17 +39,18 @@ To get started with the Todo_List Django Web App, you can clone the repository f
    
 5. Run database migrations:
    ```bash
+   python manage.py makemigrations
    python manage.py migrate
    
-6. Create a superuser account (for admin access)
+7. Create a superuser account (for admin access)
    ```bash
    python manage.py createsuperuser
    
-7. Start the development server:
+8. Start the development server:
    ```bash
    python manage.py runserver
    
-8. Open your web browser and go to http://localhost:8000 to access the Todo_List Django Web App.
+9. Open your web browser and go to http://localhost:8000 to access the Todo_List Django Web App.
 ### Installing from ZIP Archive
 
 1. Download the zip file <a href="https://github.com/NAHIAN-19/Todo-List-Django/blob/main/Todo_List.zip">Todo_List.zip</a>
