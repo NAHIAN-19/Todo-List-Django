@@ -1,6 +1,6 @@
 <h1 align="center">Todo List Web App</h1>
 
-## LIVE : todo-list--nahiannazeeb19.repl.co
+### LIVE : <a href="https://todo-list--nahiannazeeb19.repl.co">Todo List</a>
 
 ## Table of Contents
 - [Tech Stack](#tech_stack)
