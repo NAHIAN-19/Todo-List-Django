@@ -77,12 +77,8 @@ WSGI_APPLICATION = 'Todo_List.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'Todo_List',  # Your PostgreSQL database name
-        'USER': 'Admin',      # Your PostgreSQL username
-        'PASSWORD': 'baBualAmin1985',  # Your PostgreSQL password
-        'HOST': 'localhost',   # Host where your PostgreSQL server is running
-        'PORT': '',            # Leave this empty to use the default PostgreSQL port (5432)
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
 
