@@ -71,10 +71,11 @@ The Todo_List Django Web App offers the following features:
 - **Task Management**: Easily add, edit, and delete tasks.
 - **Task Prioritization**: Assign priority levels to tasks.
 - **Task Categorization**: Divide tasks in different categories
-- **User Authentication**: Securely create an account and log in.
-- **Admin Dashboard**: Access an admin dashboard [http://localhost:8000/admin/](http://localhost:8000/admin/) to manage users and tasks.
-- **Profile Managemet**: Change photo,email,password,Delete Account.
-- **Dark Mode**: Click on the Top-Right button to Turn On/Off dark mode.
+- **User Authentication**: Secure account management.
+- **Admin Dashboard**: Access admin dashboard [http://localhost:8000/admin/](http://localhost:8000/admin/) to manage users and tasks.
+- **Profile Managemet**: Change user details(photo,email,pass,name etc).
+- **Export Task Details**: Download PDF / CSV file of you tasks.
+- **Dark Mode**: Trigger Dark theme for awesome experience.
 
 ## Contributing
 
