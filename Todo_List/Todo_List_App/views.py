@@ -1,26 +1,44 @@
+import csv
+import base64
 from datetime import datetime, timedelta
 from django.contrib import messages
 from django.contrib.auth import (authenticate, login, logout,
-                                update_session_auth_hash)
+                                    update_session_auth_hash)
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.forms import (AuthenticationForm, PasswordChangeForm)
+from django.contrib.auth.forms import AuthenticationForm, PasswordChangeForm
+from django.contrib.auth.models import User , AbstractUser
+from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
 from django.db.models import F, Q
-from django.http import HttpResponse, Http404
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+from django.http import Http404, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.views.decorators.http import require_POST
-from Todo_List_App.models import Category, Task, Profile
-from .forms import PasswordChangeForm, ProfileForm, SignUpForm, SolveForm, CustomSetPasswordForm
-from django.contrib.auth.models import User
-from django.contrib.auth.forms import AuthenticationForm 
-from django.contrib.auth import get_user_model
-
-#######################this fucntion is used to signup
+from Todo_List_App.models import Activity, Category, Profile, Task , CustomUser
+from .forms import (CustomSetPasswordForm, ProfileForm,
+                    SignUpForm, SolveForm)
+from django.template.loader import get_template
+from xhtml2pdf import pisa
+from django.views import View
+from django.core.files.storage import default_storage
+from PIL import Image
+from io import BytesIO
+@receiver(post_save, sender=CustomUser)
+def create_user_activity(sender, instance, created, **kwargs):
+    if created and not Activity.objects.filter(user=instance).exists():
+        Activity.objects.create(user=instance)
+#######################this function is used to signup
 def signup(request):
     if request.method == 'POST':
         form = SignUpForm(request.POST)
         if form.is_valid():
             user = form.save()
+            user.first_name = form.cleaned_data.get('first_name')
+            user.last_name = form.cleaned_data.get('last_name')
+            user.phone = form.cleaned_data.get('phone')
+            user.address = form.cleaned_data.get('address')
+            user.save()
             profile = Profile.objects.create(user=user)
             profile_form = ProfileForm(request.POST, instance=profile)
             if profile_form.is_valid():
@@ -31,7 +49,7 @@ def signup(request):
     else:
         form = SignUpForm()
 
-    return render(request, 'Sign_up.html', {'form': form})
+    return render(request, 'Sign_up.html',{'form': form})
 
 #######################this function is used for signin
 def signin(request):
@@ -45,6 +63,7 @@ def signin(request):
             user = authenticate(request, username=username, password=password)
             if user is not None:
                 login(request, user)
+                messages.info(request, f"You are now logged in as {username}.")
                 if remember_me:
                     request.session.set_expiry(timedelta(days=7).total_seconds())
                 else:
@@ -65,7 +84,7 @@ def logout_view(request):
     logout(request)
     return redirect('signin')
 
-#######################this function is used for reseting password
+#######################this function is used for forgot password
 def forgot_password(request):
     request.session['error'] = False
     if request.method == 'POST':
@@ -74,10 +93,13 @@ def forgot_password(request):
             username = solve_form.cleaned_data['username']
             email = solve_form.cleaned_data['email']
             try:
-                user = User.objects.get(username=username, email=email)
-            except User.DoesNotExist:
+                user = CustomUser.objects.get(username=username, email=email)
+            except CustomUser.DoesNotExist:
                 user = None
             if user:
+                yes = Activity.objects.get(user=user)
+                yes.last_online = timezone.now()
+                yes.save()
                 request.session['error'] = False
                 request.session['password_reset_verified'] = True
                 timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')
@@ -109,14 +131,17 @@ def reset_password(request, user_id):
     
     try:
         user_id = int(user_id)
-        user = User.objects.get(pk=user_id)
-    except (ValueError, User.DoesNotExist):
+        user = CustomUser.objects.get(pk=user_id)
+    except (ValueError, CustomUser.DoesNotExist):
         raise Http404("No such user")
     
     if request.method == 'POST':
         form = CustomSetPasswordForm(user, request.POST)
         if form.is_valid():
             form.save()
+            yes = Activity.objects.get(user=user)
+            yes.last_online = timezone.now()
+            yes.save()
             request.session.pop('password_reset_verified', None)
             request.session.pop('password_reset_timestamp', None)
             messages.success(request, 'Password reset successful. You can now log in with your new password.',extra_tags='success')
@@ -125,7 +150,6 @@ def reset_password(request, user_id):
             messages.error(request, 'Invalid password , please try again.',extra_tags='error')
     else:
         form = CustomSetPasswordForm(user) 
-
     context = {'form': form, 'user_id': user_id}
     return render(request, 'reset_password.html', context)
 
@@ -142,7 +166,6 @@ def profile(request):
     if request.method == 'POST':
         form = ProfileForm(request.POST, request.FILES, instance=profile)
         password_form = PasswordChangeForm(user, request.POST)
-
         if form.is_valid():
             if request.POST['change_password'] == 'change':
                 if password_form.is_valid():
@@ -150,14 +173,25 @@ def profile(request):
                     update_session_auth_hash(request, user) 
 
             user.email = request.POST['email']
+            user.first_name = request.POST['first_name']
+            user.last_name = request.POST['last_name']
+            user.phone = request.POST['phone']
+            user.address = request.POST['address']
             user.save()
             form.save()
+            profile.first_name = form.cleaned_data.get('first_name')
+            profile.last_name = form.cleaned_data.get('last_name')
+            profile.phone = request.POST['phone']
+            profile.address = request.POST['address']
+            profile.save()
             messages.success(request, 'Profile updated successfully!')
             return redirect('profile')
     else:
         form = ProfileForm(instance=profile)
         password_form = PasswordChangeForm(user)
-
+    yes = Activity.objects.get(user=request.user)
+    yes.last_online = timezone.now()
+    yes.save()
     context = {'form': form, 'password_form': password_form}
     return render(request, 'profile.html', context)
 
@@ -166,7 +200,6 @@ def profile(request):
 def Todo_List_App(request):
     categories = Category.objects.filter(user=request.user)
     context = {'categories': categories, 'success': False}
-
     if request.method == "POST":
         title = request.POST['title']
         category_id = request.POST['category']
@@ -182,20 +215,22 @@ def Todo_List_App(request):
         if due_datetime <= min_due_datetime:
             messages.error(request, f"Due datetime must be at least 5 minutes from now. You entered {due_datetime.strftime('%Y-%m-%d |  %H:%M')}.")
             due_datetime = timezone.now() + timedelta(minutes=5)
-
+        
         task = Task(
             taskTitle=title,
             category=category,
             dueDate=due_datetime,
             user=request.user,
-            important = bool(important),
+            important=bool(important),
         )
         task.save()
         context['success'] = True
-
+    yes = Activity.objects.get(user=request.user)
+    yes.task_created += 1
+    yes.last_online = timezone.now()
+    yes.save()
     if not categories:
         context['no_categories'] = True
-
     running_tasks = Task.objects.filter(completed=False)
     context['running_tasks'] = running_tasks
     return render(request, 'index.html', context)
@@ -205,18 +240,30 @@ def Todo_List_App(request):
 def running_tasks(request):
     search_query = request.GET.get('search', '')
     sort_by = request.GET.get('sort_by', '')
-    tasks = Task.objects.filter(user=request.user,completed=False)
-    tasks = tasks.order_by(F('important').desc())
+    tasks_queryset = Task.objects.filter(user=request.user, completed=False)
+    tasks_queryset = tasks_queryset.order_by(F('important').desc())
+    
     if sort_by == 'asc':
-        tasks = tasks.order_by('dueDate')
+        tasks_queryset = tasks_queryset.order_by('dueDate')
     elif sort_by == 'desc':
-        tasks = tasks.order_by(F('dueDate').desc())
-        
+        tasks_queryset = tasks_queryset.order_by(F('dueDate').desc())
+
+    paginator = Paginator(tasks_queryset, 10)
+    page = request.GET.get('page')
+
+    try:
+        tasks = paginator.page(page)
+    except PageNotAnInteger:
+        tasks = paginator.page(1)
+    except EmptyPage:
+        tasks = paginator.page(paginator.num_pages)
+
     is_refreshed = request.GET.get('refresh', False)
-    task_count = tasks.count()
+    task_count = tasks_queryset.count()
+
     if not is_refreshed:
         if search_query:
-            tasks = tasks.filter(taskTitle__icontains=search_query)
+            tasks = tasks_queryset.filter(taskTitle__icontains=search_query)
             task_count = tasks.count()
         if not task_count and search_query:
             messages.warning(request, f'Task "{search_query}" wasn\'t found.')
@@ -224,19 +271,23 @@ def running_tasks(request):
             messages.success(request, f'[{task_count}] tasks found matching your search query.')
         elif not task_count and not search_query:
             messages.warning(request, 'Running Task list is empty.')
+
     context = {
         'tasks': tasks,
         'search_query': search_query,
     }
+
+    yes = Activity.objects.get(user=request.user)
+    yes.last_online = timezone.now()
+    yes.save()
+
     return render(request, 'tasks.html', context)
 
 #######################this function edits the specific running task of that user
 @login_required  
 def edit_task(request, task_id):
     task = get_object_or_404(Task, id=task_id, user=request.user)
-
     categories = Category.objects.all()
-
     if request.method == "POST":
         title = request.POST.get('title')
         category_id = request.POST.get('category')
@@ -260,11 +311,13 @@ def edit_task(request, task_id):
         task.dueDate = due_datetime
         task.important = bool(important)
         task.save()
-
         messages.success(request, "Task updated successfully!")
 
         return redirect('running_tasks') 
-
+    yes = Activity.objects.get(user=request.user)
+    yes.task_edited += 1
+    yes.last_online = timezone.now()
+    yes.save()
     context = {'task': task, 'categories': categories}
     return render(request, 'edit.html', context)
 
@@ -275,11 +328,13 @@ def mark_task_completed(request, task_id):
     task.completed = True
     task.completedDate = timezone.now()
     task.save()
-
     profile = Profile.objects.get(user=request.user)
     profile.completed_tasks_count += 1
     profile.save()
-
+    yes = Activity.objects.get(user=request.user)
+    yes.task_completed += 1
+    yes.last_online = timezone.now()
+    yes.save()
     messages.success(request, f'Task "{task.taskTitle}" marked as completed successfully. It has been moved to the''Completed Tasks' 'tab.')
     return redirect('running_tasks')
 
@@ -288,6 +343,10 @@ def mark_task_completed(request, task_id):
 def delete_task(request, task_id):
     task = get_object_or_404(Task, id=task_id, user=request.user)
     task.delete()
+    yes = Activity.objects.get(user=request.user)
+    yes.task_deleted += 1
+    yes.last_online = timezone.now()
+    yes.save()
     messages.success(request, f'Task "{task.taskTitle}" has been deleted successfully.')
     return redirect('running_tasks')
 
@@ -296,18 +355,28 @@ def delete_task(request, task_id):
 def completed_tasks(request):
     sort_by = request.GET.get('sort_by', '')
     search_query = request.GET.get('search', '')
-    completed_tasks = Task.objects.filter(user=request.user, completed=True)
+    task_queryset = Task.objects.filter(user=request.user, completed=True)
     if sort_by == 'asc':
-        completed_tasks = completed_tasks.order_by('dueDate')
+        task_queryset = task_queryset.order_by('dueDate')
     elif sort_by == 'desc':
-        completed_tasks = completed_tasks.order_by(F('dueDate').desc())
+        task_queryset = task_queryset.order_by(F('dueDate').desc())
+        
+    paginator = Paginator(task_queryset, 10)
+    page = request.GET.get('page')
+
+    try:
+        completed_tasks = paginator.page(page)
+    except PageNotAnInteger:
+        completed_tasks = paginator.page(1)
+    except EmptyPage:
+        completed_tasks = paginator.page(paginator.num_pages)
         
     is_refreshed = request.GET.get('refresh', False)
-    
+    task_count = task_queryset.count()
     if not is_refreshed:
         if search_query:
-            completed_tasks = completed_tasks.filter(taskTitle__icontains=search_query)
-        task_count = completed_tasks.count()
+            completed_tasks = task_queryset.filter(taskTitle__icontains=search_query)
+            task_count = completed_tasks.count()
         if not task_count and search_query:
             messages.warning(request, f'Task "{search_query}" wasn\'t found.')
         elif task_count and search_query:
@@ -318,11 +387,17 @@ def completed_tasks(request):
         'completed_tasks': completed_tasks,
         'search_query': search_query,
     }
+    yes = Activity.objects.get(user=request.user)
+    yes.last_online = timezone.now()
+    yes.save()
     return render(request, 'completed.html', context)
 
 #######################this function clears all those completed task details of that user
 @login_required
 def clear_history(request):
+    yes = Activity.objects.get(user=request.user)
+    yes.last_online = timezone.now()
+    yes.save()
     Task.objects.filter(Q(completed=True),user=request.user).delete()
     messages.success(request, 'Completed tasks history has been cleared.')
     return redirect('completed_tasks')
@@ -330,6 +405,9 @@ def clear_history(request):
 #######################this function adds a category for that user
 @login_required
 def add_category(request):
+    yes = Activity.objects.get(user=request.user)
+    yes.last_online = timezone.now()
+    yes.save()
     if request.method == 'POST':
         name = request.POST['name']
         existing_category = Category.objects.filter(name=name, user=request.user).first()
@@ -359,20 +437,29 @@ def all_categories(request, category_id=None):
     }
     if not categories:
         context['no_categories'] = True
+    yes = Activity.objects.get(user=request.user)
+    yes.last_online = timezone.now()
+    yes.save()
     return render(request, 'all_categories.html', context)
 
 #######################this function deletes specific category along with those associated tasks of that user
 @login_required
 def delete_category(request, category_id):
+    yes = Activity.objects.get(user=request.user)
+    yes.last_online = timezone.now()
+    yes.save()
     category = get_object_or_404(Category, id=category_id, user=request.user)
     category.delete()
     return redirect('all_categories')
 #######################this function is used to delete user account
 @login_required
 def delete_account(request, user_id):
-    user = get_object_or_404(User, id=user_id)
+    user = get_object_or_404(CustomUser, id=user_id)
+    yes = Activity.objects.get(user=request.user)
+    yes.last_online = timezone.now()
+    yes.save()
     if user.is_superuser:
-        return HttpResponse("<div class=\"container\" align =\"center\"><h1>: ERROR :</h1></div><center><h2><br>Admin accounts can only be deleted from ADMIN page.</h2></center>")
+        return HttpResponse("<div class=\"container\" align =\"center\"><h1>: ERROR :</h1></div><center><h2><br>Admin accounts can only be deleted from <a href = \"http://127.0.0.1:8000/admin/\">ADMIN</a> page.</h2></center>")
     
     if request.method == 'POST':
         confirm = request.POST.get('confirm', '')
@@ -383,4 +470,53 @@ def delete_account(request, user_id):
         else:
             return redirect('profile')
     return render(request, 'sign_in.html', {'user': user})
+
+########################this function is used to download the csv file of all the tasks of that user
+@login_required
+def export_tasks(request):
+    tasks_queryset = Task.objects.filter(user=request.user)
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="tasks.csv"'
+
+    writer = csv.writer(response)
+    writer.writerow(['Title', 'Category', 'Due Date', 'Priority', 'Completed'])
+
+    for task in tasks_queryset:
+        writer.writerow([task.taskTitle, task.category.name, task.dueDate, 'Important' if task.important else 'Not Important', 'Yes' if task.completed else 'No'])
+
+    return response
+####################this function is used to download the pdf file of all the tasks of that userclass ExportPDF(View):
+class ExportPDF(View):
+    def get(self, request):
+        user = request.user
+        tasks = Task.objects.filter(user=user)
+        profile = Profile.objects.filter(user=user).first()
+        template = get_template('tasks_pdf.html')
+
+        profile_picture_base64 = None
+        if profile and profile.profile_picture:
+            profile_picture_path = default_storage.path(profile.profile_picture.name)
+            with open(profile_picture_path, 'rb') as f:
+                image = Image.open(f)
+                buffered = BytesIO()
+                image.save(buffered, format="PNG")
+                profile_picture_base64 = base64.b64encode(buffered.getvalue()).decode()
+
+        context = {
+            'user': user,
+            'tasks': tasks,
+            'profile': profile,
+            'profile_picture_base64': profile_picture_base64,
+        }
+
+        response = HttpResponse(content_type='application/pdf')
+        response['Content-Disposition'] = 'attachment; filename="tasks.pdf"'
+
+        pisa_status = pisa.CreatePDF(template.render(context), dest=response)
+
+        if pisa_status.err:
+            return HttpResponse('We had some errors <pre>' + template.render(context) + '</pre>')
+        
+        return response
+
 
