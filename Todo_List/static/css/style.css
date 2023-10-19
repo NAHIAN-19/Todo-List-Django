@@ -1,0 +1,184 @@
+body.dark-mode {
+    background-color: #161B22;
+    color: white;
+}
+.dark-mode .navbar {
+    background-color: #0D1117 !important;
+}
+.dark-mode .navbar-dark .navbar-nav .nav-link {
+    color: white;
+}
+.dark-mode .form-label {
+    color: white;
+}
+.dark-mode .form-control {
+    background-color: #0D1117;
+    color: white;
+}
+.dark-mode .btn-primary {
+    background-color: #0D1117;
+    border-color: #0D1117;
+    color: white;
+}
+.dark-mode .btn-primary:hover {
+    background-color: #1F6FD3;
+    border-color: #1F6FD3;
+}
+.dark-mode .alert {
+    background-color: #0D1117;
+    color: white;
+}
+.at-the-end-of-text-Dark_mode {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+}
+.hello-label {
+  -ms-flex-order: 1;
+}
+.hello-input {
+  -ms-flex-order: 2;
+}
+.jumbotron {
+    background-color: rgba(255, 255, 255, 0.8);
+    padding: 3rem;
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+dark-mode .jumbotron {
+    background-color: white;
+    color: white;
+}
+.title {
+    font-size: 3rem;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 1.5rem;
+}
+.description {
+    font-size: 1.5rem;
+    color: #555;
+    margin-bottom: 2rem;
+}
+.btn-get-started {
+    background-color:blue;
+    border-color: black;
+    font-size: 1.25rem;
+    font-weight: bold;
+    padding: 0.75rem 1.5rem;
+}
+::placeholder {
+    color: #ffffff;
+    opacity: 1;
+}
+.input-class ::placeholder {
+    color: #ffffff;
+    opacity: 1;
+}
+#input-id ::placeholder {
+    color: #ffffff;
+    opacity: 1;
+}
+.dark-mode .form-control::placeholder {
+    color: white;
+}
+.dark-mode .btn-add {
+    background-color: #000;
+    border: 1px solid white;
+    color: white;
+}
+.dark-mode .btn-add:hover {
+    background-color: #333;
+}
+.dark-mode table.table {
+    background-color: #212529;
+}
+.dark-mode table.table td {
+    color: white;
+}
+.dark-mode table.table thead th {
+    color: white;
+    background-color: #343a40;
+}
+.category-name {
+    font-size: 21px;
+    font-weight: bold;
+    color: #333;
+    text-decoration: none;
+}
+.category-heading {
+    font-size: 28px;
+    font-weight: bold;
+    color: #2c3e50;
+}
+.tasks-heading {
+    font-size: 28px;
+    font-weight: bold;
+    color: #2c3e50;
+}
+.dark-mode .icon-dark-mode::-webkit-calendar-picker-indicator {
+    filter: invert(1);
+}
+.disabled-button {
+    background-color: #ccc;
+    cursor: not-allowed;
+}
+.dark-mode .form-select {
+    background-color: #0D1117;
+    color: white;
+}
+.profile-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    margin-top: 20px;
+}
+.profile-picture {
+    margin-bottom: 1px;
+}
+.dark-mode button[type="submit"][class=btn-btn-danger] {
+    background-color: red; 
+    border-color : #fff;  
+    color : white;
+}
+.dark-mode button[type="submit"][class=btn-btn-danger]:hover {
+    color: #fff;
+    border-color:red
+}
+.action-column {
+    text-align: center;
+}
+.mark-completed-btn {
+    background-color: #28a745;
+    color: #fff;
+}
+.btn-group {
+    margin-left: 12px;
+}
+.dark-mode .btn-edit {
+    background-color: blue;
+    border-color: blue;
+    color: white;
+    border-radius: 50%;
+}
+.dark-mode .btn-search {
+    background-color: #0D1117;
+    border-color: white;
+    color: white;
+}
+.btn-search {
+    background-color: #fff;
+    border-color: black;
+    color: #000;
+}
+.dark-mode .linked {
+    color: cyan;
+}
+.linked {
+    color: #B205FD;
+}
+.dark-mode .mode {
+    background-color:grey ;
+}
