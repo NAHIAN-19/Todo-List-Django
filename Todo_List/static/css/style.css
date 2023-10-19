@@ -30,8 +30,14 @@ body.dark-mode {
 }
 .at-the-end-of-text-Dark_mode {
     display: flex;
-    justify-content: flex-end;
+    justify-content: flex-start;
     align-items: center;
+}
+.hello-label {
+  -ms-flex-order: 1;
+}
+.hello-input {
+  -ms-flex-order: 2;
 }
 .jumbotron {
     background-color: rgba(255, 255, 255, 0.8);
@@ -155,6 +161,7 @@ dark-mode .jumbotron {
     background-color: blue;
     border-color: blue;
     color: white;
+    border-radius: 50%;
 }
 .dark-mode .btn-search {
     background-color: #0D1117;
