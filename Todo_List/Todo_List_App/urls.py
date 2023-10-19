@@ -21,10 +21,11 @@ urlpatterns = [
     path('logout/', views.logout_view, name='logout'),
     path('profile/', views.profile, name='profile'),
     path('categories/<int:category_id>/delete/', views.delete_category, name='delete_category'),
-    path('running-tasks/', views.running_tasks, name='running_tasks'),
     path('forgot-password/', views.forgot_password, name='forgot_password'),
     path('delete-account/<int:user_id>/delete/', views.delete_account, name='delete_account'),
-    path('reset-password/<int:user_id>/', views.reset_password, name='reset_password')
+    path('reset-password/<int:user_id>/', views.reset_password, name='reset_password'),
+    path('export/csv/', views.export_tasks, name='export_tasks'),
+    path('export/pdf/', views.ExportPDF.as_view(), name='export_pdf'),
 ]
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
