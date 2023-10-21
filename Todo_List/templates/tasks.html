@@ -72,7 +72,7 @@
                     <th scope="col">Title</th>
                     <th scope="col">Category</th>
                     <th scope="col">Due Date</th>
-                    <th scope="col">Priority</th>
+                    <th scope="col">Status</th>
                     <th scope="col" colspan="3" class="action-column">Action</th>
                 </tr>
             </thead>
@@ -82,21 +82,33 @@
                     <td>{{ task.taskTitle }}</td>
                     <td>{{ task.category.name }}</td>
                     <td>{{ task.dueDate|date:'d - m - y | h:i A' }}</td>
-                    <td>{% if task.important %}Important{% else %}Not Important{% endif %}</td>
+                    <td>
+                        {% if task.task_status == 'Overdue' %}
+                            Overdue
+                        {% else %}
+                            Pending
+                        {% endif %}
+                    </td>
                     <td align="center">
                         <div class="btn-group" role="group" aria-label="Task Actions">
+                            {% if task.task_status == 'Overdue' %}
+                            <a href="{% url 'edit_task' task.id %}" class="btn btn-warning"style="margin-right:20px;border-radius:10px;" title="Restart">
+                                <i class="fas fa-sync-alt"></i>
+                            </a>
+                            {% else %}
                             <a href="{% url 'edit_task' task.id %}" class="btn btn-primary btn-edit" style="margin-right: 20px; border-radius: 10px;"title="Edit">
                                 <i class="fas fa-edit"></i>
                             </a>
+                            {% endif %}
                             <form method="POST" action="{% url 'delete_task' task.id %}">
                                 {% csrf_token %}
-                                <button type="submit" class="btn btn-danger" style="margin-right: 20px;"title="Delete">
+                                <button type="submit" class="btn btn-danger" style="margin-right: 20px;border-radius:10px;"title="Delete">
                                     <i class="fas fa-trash"></i>
                                 </button>
                             </form>
                             <form method="post" action="{% url 'mark_task_completed' task.id %}">
                                 {% csrf_token %}
-                                <button type="submit" class="btn btn-success"title="Mark As Completed">
+                                <button type="submit" class="btn btn-success"title="Mark As Completed"style="border-radius:10px;">
                                     <i class="fas fa-check"></i>
                                 </button>
                             </form>
