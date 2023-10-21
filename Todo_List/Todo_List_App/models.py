@@ -16,15 +16,14 @@ class CustomUser(AbstractUser):
     def __str__(self):
         return self.username
 class Task(models.Model):
-    taskTitle = models.CharField(max_length=100)
+    taskTitle = models.CharField(max_length=200)
     category = models.ForeignKey('Category', related_name='tasks', on_delete=models.CASCADE, null=True)
     dueDate = models.DateTimeField()
-    completed = models.BooleanField(default=False)
     completedDate = models.DateTimeField(null=True, blank=True)
     createdDate = models.DateTimeField(default=timezone.now)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True)
     important = models.BooleanField(default=False)
-
+    status = models.CharField(max_length=100, default='Pending')
     class Meta:
         db_table = "_TaskDetails"
 
@@ -67,7 +66,7 @@ class Profile(models.Model):
         db_table = "_ProfileDetails"
 
     def update_completed_tasks_count(self):
-        self.completed_tasks_count = self.user.task_set.filter(completed=True).count()
+        self.completed_tasks_count = self.user.task_set.filter(status = 'Comepleted').count()
         self.save()
 
     def __str__(self):
