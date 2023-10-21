@@ -1,5 +1,6 @@
 import csv
 import base64
+import itertools
 from datetime import datetime, timedelta
 from django.contrib import messages
 from django.contrib.auth import (authenticate, login, logout,
@@ -8,7 +9,8 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import AuthenticationForm, PasswordChangeForm
 from django.contrib.auth.models import User , AbstractUser
 from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
-from django.db.models import F, Q
+from django.db.models import F, Q, ExpressionWrapper, BooleanField, Case, When, Value, CharField
+from django.db.models.functions import Now
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.http import Http404, HttpResponse
@@ -24,6 +26,7 @@ from django.views import View
 from django.core.files.storage import default_storage
 from PIL import Image
 from io import BytesIO
+from django.db import models
 @receiver(post_save, sender=CustomUser)
 def create_user_activity(sender, instance, created, **kwargs):
     if created and not Activity.objects.filter(user=instance).exists():
@@ -200,6 +203,7 @@ def profile(request):
 def Todo_List_App(request):
     categories = Category.objects.filter(user=request.user)
     context = {'categories': categories, 'success': False}
+    status = "Pending"
     if request.method == "POST":
         title = request.POST['title']
         category_id = request.POST['category']
@@ -207,7 +211,6 @@ def Todo_List_App(request):
         due_date = request.POST['due_date']
         due_time = request.POST['dueTime']
         important = request.POST.get('important')
-
         due_datetime = datetime.strptime(f"{due_date} {due_time}", '%Y-%m-%d %H:%M')
         min_due_datetime = timezone.now() + timedelta(minutes=5)
         due_datetime = timezone.make_aware(due_datetime, timezone.get_current_timezone())
@@ -222,6 +225,7 @@ def Todo_List_App(request):
             dueDate=due_datetime,
             user=request.user,
             important=bool(important),
+            status="Overdue" if due_datetime < timezone.now() else status,
         )
         task.save()
         context['success'] = True
@@ -231,22 +235,35 @@ def Todo_List_App(request):
     yes.save()
     if not categories:
         context['no_categories'] = True
-    running_tasks = Task.objects.filter(completed=False)
+    running_tasks = Task.objects.filter(user=request.user).filter(Q(status='Pending') | Q(status='Overdue'))
     context['running_tasks'] = running_tasks
     return render(request, 'index.html', context)
 
 #######################this function shows all the running tasks of that user
-@login_required
 def running_tasks(request):
+    now = timezone.now()
     search_query = request.GET.get('search', '')
     sort_by = request.GET.get('sort_by', '')
-    tasks_queryset = Task.objects.filter(user=request.user, completed=False)
-    tasks_queryset = tasks_queryset.order_by(F('important').desc())
-    
+    tasks_queryset = Task.objects.filter(user=request.user).filter(Q(status='Pending') | Q(status='Overdue'))
+
+    tasks_queryset = tasks_queryset.annotate(
+        task_status=Case(
+            When(dueDate__lt=now, then=Value('Overdue')),
+            default=Value('Pending'),
+            output_field=CharField(),
+        ),
+    )
+    for task in tasks_queryset:
+        if task.dueDate < now:
+            task.status = 'Overdue'
+            task.save()
+
     if sort_by == 'asc':
-        tasks_queryset = tasks_queryset.order_by('dueDate')
+        tasks_queryset = tasks_queryset.order_by('task_status', 'dueDate')
     elif sort_by == 'desc':
-        tasks_queryset = tasks_queryset.order_by(F('dueDate').desc())
+        tasks_queryset = tasks_queryset.order_by('-task_status', '-dueDate')
+    else:
+        tasks_queryset = tasks_queryset.order_by('-important', '-task_status', '-dueDate')
 
     paginator = Paginator(tasks_queryset, 10)
     page = request.GET.get('page')
@@ -265,6 +282,7 @@ def running_tasks(request):
         if search_query:
             tasks = tasks_queryset.filter(taskTitle__icontains=search_query)
             task_count = tasks.count()
+
         if not task_count and search_query:
             messages.warning(request, f'Task "{search_query}" wasn\'t found.')
         elif task_count and search_query:
@@ -278,7 +296,7 @@ def running_tasks(request):
     }
 
     yes = Activity.objects.get(user=request.user)
-    yes.last_online = timezone.now()
+    yes.last_online = now
     yes.save()
 
     return render(request, 'tasks.html', context)
@@ -310,6 +328,7 @@ def edit_task(request, task_id):
         task.category = category
         task.dueDate = due_datetime
         task.important = bool(important)
+        task.status = 'Pending'
         task.save()
         messages.success(request, "Task updated successfully!")
 
@@ -321,12 +340,13 @@ def edit_task(request, task_id):
     context = {'task': task, 'categories': categories}
     return render(request, 'edit.html', context)
 
-#######################this fucntion is used for completing tasks 
+#######################this function is used for completing tasks 
 @require_POST
 def mark_task_completed(request, task_id):
     task = get_object_or_404(Task, id=task_id,user=request.user)
-    task.completed = True
+
     task.completedDate = timezone.now()
+    task.status = "Completed"
     task.save()
     profile = Profile.objects.get(user=request.user)
     profile.completed_tasks_count += 1
@@ -355,7 +375,7 @@ def delete_task(request, task_id):
 def completed_tasks(request):
     sort_by = request.GET.get('sort_by', '')
     search_query = request.GET.get('search', '')
-    task_queryset = Task.objects.filter(user=request.user, completed=True)
+    task_queryset = Task.objects.filter(user=request.user).filter(status='Completed')
     if sort_by == 'asc':
         task_queryset = task_queryset.order_by('dueDate')
     elif sort_by == 'desc':
@@ -398,7 +418,7 @@ def clear_history(request):
     yes = Activity.objects.get(user=request.user)
     yes.last_online = timezone.now()
     yes.save()
-    Task.objects.filter(Q(completed=True),user=request.user).delete()
+    Task.objects.filter(Q(status = 'Completed'),user=request.user).delete()
     messages.success(request, 'Completed tasks history has been cleared.')
     return redirect('completed_tasks')
 
@@ -424,13 +444,19 @@ def add_category(request):
 #######################this function is used to show the categories and all those tasks that the user has
 @login_required
 def all_categories(request, category_id=None):
+    now = timezone.now()
     categories = Category.objects.filter(user=request.user)
     categories = categories.order_by('name')
     tasks = Task.objects.all()
 
     if category_id is not None:
         tasks = tasks.filter(category_id=category_id)
-        tasks = tasks.order_by('important')
+        tasks = tasks.order_by('important','-status', '-dueDate')
+        for task in tasks:
+            if task.dueDate < now:
+                task.status = 'Overdue'
+                task.save()
+    
     context = {
         'categories': categories,
         'tasks': tasks
@@ -479,10 +505,14 @@ def export_tasks(request):
     response['Content-Disposition'] = 'attachment; filename="tasks.csv"'
 
     writer = csv.writer(response)
-    writer.writerow(['Title', 'Category', 'Due Date', 'Priority', 'Completed'])
-
     for task in tasks_queryset:
-        writer.writerow([task.taskTitle, task.category.name, task.dueDate, 'Important' if task.important else 'Not Important', 'Yes' if task.completed else 'No'])
+        priority = 'Important' if task.important else 'Not Important'
+        status = (
+            'Completed' if task.status == 'Completed'
+            else 'Overdue' if task.status == 'Overdue'
+            else 'Pending'
+        )
+        writer.writerow([task.taskTitle, task.category.name, task.dueDate, priority, status])
 
     return response
 ####################this function is used to download the pdf file of all the tasks of that userclass ExportPDF(View):
