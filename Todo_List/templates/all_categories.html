@@ -44,14 +44,24 @@
                                 <td>{{ task.taskTitle }}</td>
                                 <td>{{ task.createdDate |date:'d - m - y | h:i A' }}</td>
                                 <td>
-                                    {% if task.completed %}
-                                    {{ task.completedDate |date:'d - m - y | h:i A' }}
-                                    {% else %}
-                                    {{ task.dueDate |date:'d - m - y | h:i A' }}
+                                    {% if task.status == 'Completed' %}
+                                        {{ task.completedDate|date:'d - m - Y | H:i A' }}
+                                    {% elif task.status == 'Pending' %}
+                                        {{ task.dueDate|date:'d - m - Y | H:i A' }}
+                                    {% elif task.status == 'Overdue' %}
+                                        {{ task.dueDate|date:'d - m - Y | H:i A' }}
                                     {% endif %}
                                 </td>
                                 <td>{% if task.important %}Important{% else %}Not Important{% endif %}</td>
-                                <td> {% if task.completed %}Completed{% else %}Running{% endif %}</td>
+                                <td>
+                                    {% if task.status == 'Completed' %}
+                                        Completed
+                                    {% elif task.status == 'Pending' %}
+                                        Pending
+                                    {% elif task.status == 'Overdue' %}
+                                        Overdue
+                                    {% endif %}
+                                </td>
                             </tr>
                             {% empty %}
                             <tr>
