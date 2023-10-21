@@ -4,8 +4,8 @@ from Todo_List_App.models import Task, Category, Profile, Activity, CustomUser
 from Todo_List_App.forms import CustomUserAdminForm
 
 class TaskAdmin(admin.ModelAdmin):
-    list_display = ('taskTitle', 'category', 'dueDate', 'completed','important', 'completedDate', 'createdDate', 'user')
-    ordering = ('completed', 'dueDate',)
+    list_display = ('taskTitle', 'category', 'dueDate', 'status','important', 'completedDate', 'createdDate', 'user')
+    ordering = ('status', 'dueDate',)
 
 class ProfileAdmin(admin.ModelAdmin):
     list_display = ('user', 'completed_tasks_count')
