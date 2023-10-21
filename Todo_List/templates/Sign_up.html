@@ -6,20 +6,19 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sign Up</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.13.0/css/all.min.css">
     <style>
         body {
             background-color: #000;
             color: #fff;
             font-family: Arial, sans-serif;
         }
-
         .container {
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
+            height: 90vh;
         }
-
         .form {
             background-color: #fff;
             color: #000;
@@ -28,18 +27,31 @@
             max-width: 400px;
             text-align: center;
         }
-
         input[type="text"],
         input[type="email"],
         input[type="password"] {
             width: 100%;
             padding: 10px;
+            margin-left:-10px;
             margin-bottom: 10px;
             border: 1px solid #ccc;
             border-radius: 5px;
             outline: none;
         }
 
+        .input-group {
+            position: relative;
+        }
+
+        .input-group i {
+            position: absolute;
+            right: -5px;
+            top: 35%;
+            down: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+        }
+        
         input[type="submit"] {
             background-color: #000;
             color: #fff;
@@ -48,11 +60,11 @@
             border-radius: 5px;
             cursor: pointer;
         }
-        .signup_link {
+        .signup-link {
             color: black;
             text-decoration: none;
         }
-        .signup_link:hover {
+        .signup-link:hover {
             text-decoration: underline;
         }
         .alert-box {
@@ -98,8 +110,14 @@
             <input type="text" name="last_name" placeholder="Last Name" required>
             <input type="text" name="phone" placeholder="Phone" required>
             <input type="text" name="address" placeholder="Address" required>
-            <input type="password" name="password1" placeholder="Password" required>
-            <input type="password" name="password2" placeholder="Confirm Password" required>
+            <div class="input-group">
+                <input type="password" name="password1" placeholder="Password" required>
+                <i class="fa fa-eye toggle-password" id="eye1"></i>
+            </div>
+            <div class="input-group">
+                <input type="password" name="password2" placeholder="Confirm Password" required>
+                <i class="fa fa-eye toggle-password" id="eye2"></i>
+            </div>
             {% if form.password1.errors %}
                 {% for error in form.password1.errors %}
                     <div class="alert-box alert-danger">
@@ -115,7 +133,7 @@
                 {% endfor %}
             {% endif %}
             <input type="submit" value="Sign Up">
-            <p>Already have an account? <a href="{% url 'signin' %}"><b>Sign in</b></a></p>
+            <p>Already have an account? <a href="{% url 'signin' %}"style="color:blue;"><b>Sign in</b></a></p>
             {% if messages %}
                 <div class="text-center mt-3">
                     {% for message in messages %}
@@ -127,5 +145,21 @@
             {% endif %}
         </form>
     </div>
+    <script>
+        const eyes = document.querySelectorAll('.toggle-password');
+        const passwords = [document.querySelector('input[name="password1"]'), document.querySelector('input[name="password2"]')];
+    
+        eyes.forEach((eye, index) => {
+            eye.addEventListener('click', () => {
+                if (passwords[index].type === 'password') {
+                    passwords[index].type = 'text';
+                    eye.classList.add('fa-eye-slash');
+                } else {
+                    passwords[index].type = 'password';
+                    eye.classList.remove('fa-eye-slash');
+                }
+            });
+        });
+    </script>
 </body>
 </html>
