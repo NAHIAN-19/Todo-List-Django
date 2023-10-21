@@ -15,7 +15,8 @@ class ActivityAdmin(admin.ModelAdmin):
 class CategoryAdmin(admin.ModelAdmin):
     list_display = ('name', 'user')
 class CustomUserAdmin(UserAdmin):
-    list_display = ('username', 'first_name', 'last_name', 'phone','email')
+    list_display = ('username', 'first_name', 'last_name', 'phone','email','is_active')
+    list_filter = ('is_active',)
     form = CustomUserAdminForm
     fieldsets = (
         (None, {'fields': ('username', 'password')}),
