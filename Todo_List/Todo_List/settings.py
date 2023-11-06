@@ -9,6 +9,8 @@ https://docs.djangoproject.com/en/4.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.2/ref/settings/
 """
+def import_rest_framework_token():
+    from rest_framework.authtoken.models import Token
 from pathlib import Path
 import os
 
@@ -37,7 +39,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    #'rest-framework',
+    'rest_framework',
+    'rest_framework.authtoken',
     'Todo_List_App',
 ]
 
@@ -47,8 +50,10 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'Todo_List_App.middleware.OverdueTaskMiddleware', 
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'Todo_List_App.middleware.AuthenticationMiddleware',  
 ]
 
 ROOT_URLCONF = 'Todo_List.urls'
@@ -68,7 +73,9 @@ TEMPLATES = [
         },
     },
 ]
-
+AUTHENTICATION_BACKENDS = [
+    'Todo_List_App.backends.RawPasswordModelBackend',
+]
 WSGI_APPLICATION = 'Todo_List.wsgi.application'
 
 
@@ -99,7 +106,13 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
-
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.TokenAuthentication',
+    ],
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
+    'PAGE_SIZE': 10,
+}
 
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
@@ -131,3 +144,4 @@ STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 AUTH_PASSWORD_RESET_TIMEOUT = 60 * 0.5
 AUTH_USER_MODEL = 'Todo_List_App.CustomUser'
+API_LOGIN_NEXT = '/api/'
