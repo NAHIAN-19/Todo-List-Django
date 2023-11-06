@@ -12,7 +12,9 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 def import_rest_framework_token():
     from rest_framework.authtoken.models import Token
 from pathlib import Path
+from dotenv import load_dotenv
 import os
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -22,7 +24,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-4b6b=)mz3awe1n=z+wcyol1z8^c5f(u1l%u&%hr^bu==d0%z)x'
+SECRET_KEY = os.environ.get('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
