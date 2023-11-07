@@ -76,6 +76,7 @@ The Todo_List Django Web App offers the following features:
 - **Profile Managemet**: Change user details(photo,email,pass,name etc).
 - **Export Task Details**: Download PDF / CSV file of you tasks.
 - **Dark Mode**: Trigger Dark theme for awesome experience.
+- **API**: Rest API for task and user data.
 
 ## Contributing
 
