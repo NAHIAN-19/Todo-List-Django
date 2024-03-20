@@ -19,6 +19,7 @@
         th, td {
             text-align: left;
             padding: 8px;
+            word-wrap: break-word;
         }
         tr:nth-child(even) {
             background-color: #f2f2f2;
@@ -32,6 +33,11 @@
             display: flex;
             justify-content: center;
         }
+        .column img {
+            border-radius: 50%;
+            max-width: 100px;
+            height: auto;
+        }
     </style>
 </head>
 <body>
@@ -39,7 +45,7 @@
     {% if profile_picture_base64 %}
     <div class="row">
         <div class = "column">
-            <img src="data:image/png;base64,{{ profile_picture_base64 }}" class="avatar" alt="Avater"style="border-radius:50%;">
+            <img src="data:image/png;base64,{{ profile_picture_base64 }}"style="border-radius:50%;">
         </div>
         <div class="column">
             <p><strong>Username:</strong> {{ user.username }}</p>
@@ -59,9 +65,9 @@
     </div>
     {% endif %}
     <div>
-        <p class ="total-task"><strong>Total Tasks: {{ tasks|length }}</strong></p>
+        <p class="total-task"><strong>Total Tasks: {{ tasks|length }}</strong></p>
     </div>
-    <table border = "1">
+    <table border="1">
         <thead>
             <tr>
                 <th scope="col">Title</th>
@@ -86,7 +92,7 @@
                     {% endif %}
                 </td>
                 <td>{% if task.important %}Important{% else %}Not Important{% endif %}</td>
-                <td>{% if task.completed %}Completed{% else %}Pending{% endif %}</td>
+                <td>{{ task.status }}</td>
             </tr>
             {% endfor %}
         </tbody>
