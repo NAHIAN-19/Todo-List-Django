@@ -12,34 +12,42 @@
     {% include 'base.html' %}
     <div class="container my-3">
         <h3 class="text-center">Edit Task</h3>
-        <form method="post" action="{% url 'edit_task' task.id%}">
-            {% csrf_token %}
-            <div class="mb-3">
-                <label for="title" class="form-label">Task Title</label>
-                <input type="text" class="form-control" id="title" name="title" value="{{ task.taskTitle }}" required>
-            </div>
-            <div class="mb-3">
-                <label for="due_date" class="form-label">Due Date</label>
-                <input type="date" class="form-control icon-dark-mode" id="due_date" name="due_date" value="{{ task.dueDate|date:'Y-m-d' }}" required>
-            </div>
-            <div class="mb-3">
-                <label for="dueTime" class="form-label">Due Time</label>
-                <input type="time" class="form-control icon-dark-mode" id="dueTime" name="dueTime" value="{{ task.dueDate|time:'H:i' }}" required>
-            </div>
-            <div class="mb-3">
-                <label for="category" class="form-label">Category</label>
-                <select class="form-control" id="category" name="category" required>
-                    <option value="" selected disabled>Select a category</option>
-                    {% for category in categories %}
-                        <option value="{{ category.id }}" {% if category.id == task.category.id %}selected{% endif %}>{{ category.name }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-            <div class="mb-3">
-                <label for="important"class="form-check-label">Important</label>
-                <input type="checkbox"class="form-check-input" id="important"name="important">
-            </div>
-            <button type="submit" class="btn btn-primary btn-add">Save Changes</button>
+        <form method="post" action="{% url 'edit_task' task.id %}">
+                {% csrf_token %}
+                <div class="d-flex justify-content-center">
+                    <div style="width: 800px;">
+                        <div class="mb-3">
+                            <label for="title" class="form-label">Task Title</label>
+                            <input type="text" class="form-control" id="title" name="title" value="{{ task.taskTitle }}">
+                        </div>
+                        <div class="mb-3">
+                            <label for="description" class="form-label">Task Description</label>
+                            <textarea class="form-control" id="description" name="description" rows="2" required>{{ task.description }}</textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="due_date" class="form-label">Due Date</label>
+                            <input type="date" class="form-control icon-dark-mode" id="due_date" name="due_date" value="{{ task.dueDate|date:'Y-m-d' }}" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="dueTime" class="form-label">Due Time</label>
+                            <input type="time" class="form-control icon-dark-mode" id="dueTime" name="dueTime" value="{{ task.dueDate|time:'H:i' }}" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="category" class="form-label">Category</label>
+                            <select class="form-control" id="category" name="category" required>
+                                <option value="" selected disabled>Select a category</option>
+                                {% for category in categories %}
+                                    <option value="{{ category.id }}" {% if category.id == task.category.id %}selected{% endif %}>{{ category.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="important" class="form-check-label">Important :</label>
+                            <input type="checkbox" class="form-check-input" id="important" name="important" {% if task.important %}checked{% endif %}>
+                        </div>                        
+                        <button type="submit" class="btn btn-primary btn-add" >Save Changes</button>
+                    </div>
+                </div>
         </form>
         {% if success %}
             <div class="alert alert-success mt-3 text-center" role="alert">

@@ -25,7 +25,13 @@
             border-radius: 50%;
             border-color: #007bff;
         }
-        
+        .btn-danger {
+            bottom:1%;
+            right:1%;
+            position: fixed;
+            margin: 10px;
+            border-radius: 50%;
+        }
     </style>
 </head>
 <body>
@@ -78,13 +84,51 @@
         </thead>
         <tbody>
             {% for task in completed_tasks %}
-            <tr>
+            <tr class="task-row" data-toggle="modal" data-target="#taskModal{{ task.id }}">
                 <td>{{ task.taskTitle }}</td>
                 <td>{{ task.category.name }}</td>
                 <td>{{ task.createdDate|date:'d - m - y | h:i A' }}</td>
                 <td>{{ task.completedDate|date:'d - m - y | h:i A' }}</td>
                 <td>{% if task.important %}Important{% else %}Not Important{% endif %}</td>
             </tr>
+            <div class="modal fade task-modal" id="taskModal{{ task.id }}" tabindex="-1" aria-labelledby="taskModal{{ task.id }}" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered overflow-hidden">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="taskModal{{ task.id }}">{{ task.taskTitle }}</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body text-start">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <p class="field-name">Created Date</p>
+                                    <p class="field">{{ task.createdDate|date:'d/m/Y | h:i A' }}</p>
+                                </div>
+                                <div class="col-md-6">
+                                    <p class="field-name">Due Date</p>
+                                    <p class="field">{{ task.dueDate|date:'d/m/Y | h:i A' }}</p>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <p class="field-name">Category</p>
+                                    <p class="field">{{ task.category }}</p>
+                                </div>
+                                <div class="col-md-6">
+                                    <p class="field-name">Status</p>
+                                    <p class="field">{{ task.status }}</p>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <p class="field-name">Description</p>
+                                    <pre class="field">{{ task.description|linebreaksbr|safe }}</pre>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
             {% endfor %}
         </tbody>
     </table>
@@ -125,7 +169,7 @@
     </div>
     <form method="POST" action="{% url 'clear_history' %}" align="right">
         {% csrf_token %}
-        <button type="submit" class="btn btn-danger"title="Clear History"style="border-radius:7%;width:110px;"><i class="fas fa-trash"></i></button>
+        <button type="submit" class="btn btn-danger"title="Clear History"><i class="fas fa-trash"></i></button>
     </form>
     {% endif %}
 </div>
@@ -152,6 +196,24 @@
             setTimeout(function () {
                 window.location.href = '?page=' + targetPage;
             }, 0);
+        });
+    });
+</script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<script>
+    $(document).ready(function() {
+        $(".task-row").click(function(e) {
+            e.preventDefault();
+            $(".modal").modal("hide");
+            var modalId = $(this).attr("data-target");
+            $(modalId).modal("show");
+        });
+        $(".btn-warning, .btn-edit, .btn-danger, .btn-success").click(function(e) {
+            e.stopPropagation();
+        });
+        $(".modal .close").click(function() {
+            $(this).closest(".modal").modal("hide");
         });
     });
 </script>

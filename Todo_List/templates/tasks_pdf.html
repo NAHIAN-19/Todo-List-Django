@@ -38,6 +38,12 @@
             max-width: 100px;
             height: auto;
         }
+        .des {
+            font-size: 14px;
+            text-align: center;
+            margin-top: 5px;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
@@ -83,16 +89,22 @@
             <tr>
                 <td>{{ task.taskTitle }}</td>
                 <td>{{ task.category.name }}</td>
-                <td>{{ task.createdDate | date:"d /m /y- h:i A" }}</td>
+                <td>{{ task.createdDate | date:"d /m /y  h:i A" }}</td>
                 <td>
                     {% if task.completed %}
-                    {{ task.completedDate | date:"d /m /y- h:i A" }}
+                    {{ task.completedDate | date:"d /m /y  h:i A" }}
                     {% else %}
-                    {{ task.dueDate | date:"d /m /y- h:i A" }}
+                    {{ task.dueDate | date:"d /m /y  h:i A" }}
                     {% endif %}
                 </td>
                 <td>{% if task.important %}Important{% else %}Not Important{% endif %}</td>
                 <td>{{ task.status }}</td>
+            </tr>
+            <tr>
+                <td colspan="6">
+                    <div class="des">Description</div>
+                    <div style="text-align:center;">{{ task.description }}</div>
+                </td>
             </tr>
             {% endfor %}
         </tbody>

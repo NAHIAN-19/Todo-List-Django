@@ -1,6 +1,6 @@
 <h1 align="center">Todo List Web App</h1>
 
-![Create Task](https://github.com/NAHIAN-19/Todo-List-Django/blob/main/Screenshots/Create_task.png "Create Task")
+![Create Task](https://github.com/NAHIAN-19/Todo-List-Django/blob/main/Screenshots/create_task.png "Create Task")
 
 ![Create Task](https://github.com/NAHIAN-19/Todo-List-Django/blob/master/Screenshots/create-task.png "Create Task")
 
