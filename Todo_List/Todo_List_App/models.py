@@ -19,6 +19,7 @@ class CustomUser(AbstractUser):
     
 class Task(models.Model):
     taskTitle = models.CharField(max_length=200)
+    description = models.TextField(null = True, blank = True)
     category = models.ForeignKey('Category', related_name='tasks', on_delete=models.CASCADE, null=True)
     dueDate = models.DateTimeField(db_column = 'duedate')
     completedDate = models.DateTimeField(null=True, blank=True)

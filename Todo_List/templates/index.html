@@ -14,40 +14,49 @@
         <h3 class="text-center">Create a Task</h3>
         <form method="POST" action="{% url 'Todo_List_App' %}">
             {% csrf_token %}
-            <div class="mb-3">
-                <label for="title" class="form-label">Task Title</label>
-                <input type="text" class="form-control" id="title" name="title" required>
-            </div>
-            <div class="mb-3">
-                <label for="due_date" class="form-label">Due Date</label>
-                <input type="date" class="form-control icon-dark-mode" id="due_date" name="due_date" required>
-            </div>
-            <div class="mb-3">
-                <label for="dueTime" class="form-label">Due Time</label>
-                <input type="time" class="form-control icon-dark-mode" id="dueTime" name="dueTime" value="{{ current_time_plus_one_hour }}" required>
-            </div>
-            <div class="mb-3">
-                <label for="category" class="form-label">Category</label>
-                <select class="form-control" id="category" name="category" {% if no_categories %}disabled{% endif %} required>
-                    <option value="" selected disabled>Select a category</option>
-                    {% for category in categories %}
-                        <option value="{{ category.id }}">{{ category.name }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-            <div class="mb-3">
-                <label for="important"class="form-check-label">Important :</label>
-                <input type="checkbox"class="form-check-input" id="important"name="important">
-            </div>
-            <button type="submit" class="btn btn-primary btn-add{% if no_categories %} disabled{% endif %}" {% if no_categories %}disabled{% endif %} style="background-color:#0DBEF3;">Submit</button>
-            {% if no_categories %}
-            <center>
-                <div class="alert alert-danger mt-3 text-center" role="alert">
-                    You need to create a category first! <a href="{% url 'add_category' %}" class="alert-link linked"> Add Category</a>
+            <div class="d-flex justify-content-center">
+                <div style="width: 800px;">
+                    <div class="mb-3">
+                        <label for="title" class="form-label">Task Title</label>
+                        <input type="text" class="form-control" id="title" name="title" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Task Description</label>
+                        <textarea class="form-control" id="description" name="description" rows="2"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="due_date" class="form-label">Due Date</label>
+                        <input type="date" class="form-control icon-dark-mode" id="due_date" name="due_date" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="dueTime" class="form-label">Due Time</label>
+                        <input type="time" class="form-control icon-dark-mode" id="dueTime" name="dueTime" value="{{ current_time_plus_one_hour }}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="category" class="form-label">Category</label>
+                        <select class="form-control" id="category" name="category" {% if no_categories %}disabled{% endif %} required>
+                            <option value="" selected disabled>Select a category</option>
+                            {% for category in categories %}
+                                <option value="{{ category.id }}">{{ category.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="important"class="form-check-label">Important :</label>
+                        <input type="checkbox"class="form-check-input" id="important"name="important">
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-add{% if no_categories %} disabled{% endif %}" {% if no_categories %}disabled{% endif %}>Submit</button>
+                    {% if no_categories %}
+                    <div class="text-center mt-3">
+                        <div class="alert alert-danger" role="alert">
+                            You need to create a category first! <a href="{% url 'add_category' %}" class="alert-link linked"> Add Category</a>
+                        </div>
+                    </div>
+                    {% endif %}
                 </div>
-            </center>
-            {% endif %}
+            </div>
         </form>
+        
         {% if success %}
             <div class="alert alert-success mt-3 text-center" role="alert">
                 Task created successfully!

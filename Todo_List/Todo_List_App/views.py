@@ -237,6 +237,7 @@ def Todo_List_App(request):
     status = "Pending"
     if request.method == "POST":
         title = request.POST['title']
+        description = request.POST['description']
         category_id = request.POST['category']
         category = Category.objects.get(id=category_id)
         due_date = request.POST['due_date']
@@ -252,6 +253,7 @@ def Todo_List_App(request):
         
         task = Task(
             taskTitle=title,
+            description=description,
             category=category,
             dueDate=due_datetime,
             user=request.user,
@@ -344,6 +346,7 @@ def edit_task(request, task_id):
     categories = Category.objects.filter(user=request.user)
     if request.method == "POST":
         title = request.POST.get('title')
+        description = request.POST.get('description')
         category_id = request.POST.get('category')
         category = get_object_or_404(Category, id=category_id)
         important = request.POST.get('important')
@@ -361,6 +364,7 @@ def edit_task(request, task_id):
             due_datetime = timezone.now() + timedelta(minutes=5)
 
         task.taskTitle = title
+        task.description = description
         task.category = category
         task.dueDate = due_datetime
         task.important = bool(important)

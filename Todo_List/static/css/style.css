@@ -34,10 +34,10 @@ body.dark-mode {
     align-items: center;
 }
 .hello-label {
-  -ms-flex-order: 1;
+    -ms-flex-order: 1;
 }
 .hello-input {
-  -ms-flex-order: 2;
+    -ms-flex-order: 2;
 }
 .jumbotron {
     background-color: rgba(255, 255, 255, 0.8);
@@ -82,8 +82,14 @@ dark-mode .jumbotron {
 .dark-mode .form-control::placeholder {
     color: white;
 }
+.btn-add {
+    background-color:#0DBEF3;
+    position:absolute;
+    right:50%;
+    transform:translateX(50%);
+}
 .dark-mode .btn-add {
-    background-color: #000;
+    background-color: #0DBEF3;
     border: 1px solid white;
     color: white;
 }
@@ -92,6 +98,8 @@ dark-mode .jumbotron {
 }
 .dark-mode table.table {
     background-color: #212529;
+    border-radius: 5px;
+    padding : 5px;
 }
 .dark-mode table.table td {
     color: white;
@@ -181,4 +189,63 @@ dark-mode .jumbotron {
 }
 .dark-mode .mode {
     background-color:grey ;
+}
+.mode {
+    background-color: #f8f9fa;
+}
+.dark-mode .modal-body {
+    background-color: #0D1117;
+    color: white;
+}
+.field-name {
+    background-color: #E7E7E7;
+    padding: 5px;
+    margin-bottom: 5px;
+    border-radius: 5px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: 500;
+}
+.dark-mode .field-name {
+    background-color: #A9A9A9;
+    padding: 5px;
+    margin-bottom: 5px;
+    border-radius: 5px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight:500;
+
+}
+.field {
+    background-color: white;
+    padding: 5px;
+    margin-bottom: 5px;
+    border-radius: 5px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.dark-mode .field {
+    background-color: black;
+    padding: 5px;
+    margin-bottom: 5px;
+    border-radius: 5px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-color: white;
+}
+.modal-title {
+    color: black;
+    right : 50%;
+    transform: translateX(50%);
+    position: absolute;
+}
+.task-row{
+    cursor:pointer;
+}
+.word-wrap {
+    word-wrap: break-word;
 }
