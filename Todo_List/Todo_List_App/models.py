@@ -69,37 +69,3 @@ class Solve(models.Model):
     username = models.CharField(max_length=100)
     email = models.EmailField()
 
-
-class Activity(models.Model):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True)
-    task_created = models.PositiveIntegerField(default=0)
-    task_edited = models.PositiveIntegerField(default=0)
-    task_completed = models.PositiveIntegerField(default=0)
-    task_deleted = models.PositiveIntegerField(default=0)
-    account_created = models.DateTimeField(auto_now_add=True)
-    last_online = models.DateTimeField(auto_now=True)
-
-    def increment_task_created(self):
-        self.task_created += 1
-        self.save()
-
-    def increment_task_edited(self):
-        self.task_edited += 1
-        self.save()
-
-    def increment_task_completed(self):
-        self.task_completed += 1
-        self.save()
-
-    def increment_task_deleted(self):
-        self.task_deleted += 1
-        self.save()
-
-    def update_last_online(self):
-        self.last_online = timezone.now()
-        self.save()
-
-    def update_account_created(self):
-        self.account_created = timezone.now()
-        self.save()
-

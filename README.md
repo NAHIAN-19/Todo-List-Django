@@ -21,12 +21,14 @@
 ### Cloning from GitHub Repository
 
 To get started with the Todo_List Django Web App, you can clone the repository from GitHub using the following steps:
-
+ 
 1. **Clone the repository**:
 
    ```bash
    git clone https://github.com/NAHIAN-19/Todo-List-Django.git
    
+2. Install the <a href="https://github.com/NAHIAN-19/Todo-List-Django/blob/main/gtk3-runtime-3.24.31-2022-01-04-ts-win64.zip">GTK Installer</a>
+
 2. Navigate to the project folder:
    ```bash
    cd Todo_List

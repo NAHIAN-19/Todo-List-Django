@@ -1,5 +1,7 @@
 {% load static %}
 <link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
+
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
     <div class="container-fluid">
         <a class="navbar-brand" href="/todo">TODO</a>
@@ -95,14 +97,13 @@
                         <li><hr class="dropdown-divider"></li>
                         <li>
                             <a class="dropdown-item" href="{% url 'profile' %}">
-                                <i class="bi bi-person"></i>
-                                Account
+                                <i class="bi bi-person"></i>  Account
                             </a>
                         </li>
                         <li><hr class="dropdown-divider"></li>
                         <li>
                             <a class="dropdown-item" href="https://github.com/NAHIAN-19/Todo-List-Django">
-                                <i class="bi bi-envelope"></i>About
+                                <i class="bi bi-envelope"></i>   About
                             </a>
                         </li> 
                         <li><hr class="dropdown-divider"></li>
@@ -113,8 +114,7 @@
                         <li><hr class="dropdown-divider"></li>
                         <li>
                             <a class="dropdown-item" href="{% url 'logout' %}">
-                                <i class="bi bi-box-arrow-right"></i>
-                                Logout
+                                <i class="bi bi-box-arrow-right"></i>  Logout
                             </a>
                         </li>
                     </ul>

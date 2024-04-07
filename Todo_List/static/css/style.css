@@ -27,6 +27,9 @@ body.dark-mode {
 .dark-mode .alert {
     background-color: #0D1117;
     color: white;
+    width : 800px;
+    text-align: center;
+    overflow:hidden;
 }
 .at-the-end-of-text-Dark_mode {
     display: flex;
@@ -248,4 +251,7 @@ dark-mode .jumbotron {
 }
 .word-wrap {
     word-wrap: break-word;
+}
+.dark-mode .btn-close { 
+    filter : invert(1);
 }

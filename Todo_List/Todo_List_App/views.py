@@ -9,17 +9,18 @@ from django.contrib.auth.forms import AuthenticationForm, PasswordChangeForm
 from django.contrib.auth.models import User , AbstractUser
 from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
 from django.db.models import F, Q, Case, When, Value, CharField
+from django.utils.safestring import mark_safe
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.http import Http404, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.views.decorators.http import require_POST
-from Todo_List_App.models import Activity, Category, Profile, Task , CustomUser
+from Todo_List_App.models import Category, Profile, Task , CustomUser
 from .forms import (CustomSetPasswordForm, ProfileForm,
                     SignUpForm, SolveForm)
 from django.template.loader import get_template
-from xhtml2pdf import pisa
+from weasyprint import HTML
 from django.views import View
 from django.core.files.storage import default_storage
 from PIL import Image
@@ -52,11 +53,6 @@ def update_task_status(user):
             task.status = 'Pending'
             task.save()
             
-            
-@receiver(post_save, sender=CustomUser)
-def create_user_activity(sender, instance, created, **kwargs):
-    if created and not Activity.objects.filter(user=instance).exists():
-        Activity.objects.create(user=instance)
 #######################this function is used to signup
 def signup(request):
     if request.user.is_authenticated:
@@ -131,9 +127,6 @@ def forgot_password(request):
             except CustomUser.DoesNotExist:
                 user = None
             if user:
-                yes = Activity.objects.get(user=user)
-                yes.last_online = timezone.now()
-                yes.save()
                 request.session['error'] = False
                 request.session['password_reset_verified'] = True
                 timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')
@@ -173,9 +166,6 @@ def reset_password(request, user_id):
         form = CustomSetPasswordForm(user, request.POST)
         if form.is_valid():
             form.save()
-            yes = Activity.objects.get(user=user)
-            yes.last_online = timezone.now()
-            yes.save()
             request.session.pop('password_reset_verified', None)
             request.session.pop('password_reset_timestamp', None)
             messages.success(request, 'Password reset successful. You can now log in with your new password.',extra_tags='success')
@@ -223,9 +213,6 @@ def profile(request):
     else:
         form = ProfileForm(instance=profile)
         password_form = PasswordChangeForm(user)
-    yes = Activity.objects.get(user=request.user)
-    yes.last_online = timezone.now()
-    yes.save()
     context = {'form': form, 'password_form': password_form}
     return render(request, 'profile.html', context)
 
@@ -233,7 +220,11 @@ def profile(request):
 @login_required
 def Todo_List_App(request):
     categories = Category.objects.filter(user=request.user)
-    context = {'categories': categories, 'success': False}
+    cur_date = timezone.now()
+    cur_date = cur_date.strftime('%Y-%m-%d')
+    cur_time = timezone.now() + timedelta(hours = 6,minutes=6)
+    cur_time = cur_time.strftime('%H:%M')
+    context = {'categories': categories, 'success': False, 'cur_time': cur_time, 'cur_date': cur_date}
     status = "Pending"
     if request.method == "POST":
         title = request.POST['title']
@@ -262,10 +253,6 @@ def Todo_List_App(request):
         )
         task.save()
         context['success'] = True
-    yes = Activity.objects.get(user=request.user)
-    yes.task_created += 1
-    yes.last_online = timezone.now()
-    yes.save()
     if not categories:
         context['no_categories'] = True
     running_tasks = Task.objects.filter(user=request.user).filter(Q(status='Pending') | Q(status='Overdue'))
@@ -332,10 +319,6 @@ def running_tasks(request):
         'tasks': tasks,
         'search_query': search_query,
     }
-
-    yes = Activity.objects.get(user=request.user)
-    yes.last_online = now
-    yes.save()
     update_task_status(request.user)
     return render(request, 'tasks.html', context)
 
@@ -373,10 +356,6 @@ def edit_task(request, task_id):
         messages.success(request, "Task updated successfully!")
 
         return redirect('running_tasks') 
-    yes = Activity.objects.get(user=request.user)
-    yes.task_edited += 1
-    yes.last_online = timezone.now()
-    yes.save()
     update_task_status(request.user)
     context = {'task': task, 'categories': categories}
     return render(request, 'edit.html', context)
@@ -392,12 +371,10 @@ def mark_task_completed(request, task_id):
     profile = Profile.objects.get(user=request.user)
     profile.completed_tasks_count += 1
     profile.save()
-    yes = Activity.objects.get(user=request.user)
-    yes.task_completed += 1
-    yes.last_online = timezone.now()
-    yes.save()
     update_task_status(request.user)
-    messages.success(request, f'Task "{task.taskTitle}" marked as completed successfully. It has been moved to the''Completed Tasks' 'tab.')
+    completed_tasks_link = '<a href="/completed-tasks"style="text-decoration:none;">Completed Tasks</a>'
+    message = mark_safe(f'Task "{task.taskTitle}" marked as completed successfully. It has been moved to the {completed_tasks_link} page.')
+    messages.success(request, message)
     return redirect('running_tasks')
 
 #######################this function deletes that specific task details from running tasks of that user
@@ -405,10 +382,6 @@ def mark_task_completed(request, task_id):
 def delete_task(request, task_id):
     task = get_object_or_404(Task, id=task_id, user=request.user)
     task.delete()
-    yes = Activity.objects.get(user=request.user)
-    yes.task_deleted += 1
-    yes.last_online = timezone.now()
-    yes.save()
     update_task_status(request.user)
     messages.success(request, f'Task "{task.taskTitle}" has been deleted successfully.')
     return redirect('running_tasks')
@@ -450,18 +423,12 @@ def completed_tasks(request):
         'completed_tasks': completed_tasks,
         'search_query': search_query,
     }
-    yes = Activity.objects.get(user=request.user)
-    yes.last_online = timezone.now()
-    yes.save()
     update_task_status(request.user)
     return render(request, 'completed.html', context)
 
 #######################this function clears all those completed task details of that user
 @login_required
 def clear_history(request):
-    yes = Activity.objects.get(user=request.user)
-    yes.last_online = timezone.now()
-    yes.save()
     Task.objects.filter(Q(status = 'Completed'),user=request.user).delete()
     update_task_status(request.user)
     messages.success(request, 'Completed tasks history has been cleared.')
@@ -470,9 +437,6 @@ def clear_history(request):
 #######################this function adds a category for that user
 @login_required
 def add_category(request):
-    yes = Activity.objects.get(user=request.user)
-    yes.last_online = timezone.now()
-    yes.save()
     if request.method == 'POST':
         name = request.POST['name']
         existing_category = Category.objects.filter(name=name, user=request.user).first()
@@ -509,18 +473,12 @@ def all_categories(request, category_id=None):
     }
     if not categories:
         context['no_categories'] = True
-    yes = Activity.objects.get(user=request.user)
-    yes.last_online = timezone.now()
-    yes.save()
     update_task_status(request.user)
     return render(request, 'all_categories.html', context)
 
 #######################this function deletes specific category along with those associated tasks of that user
 @login_required
 def delete_category(request, category_id):
-    yes = Activity.objects.get(user=request.user)
-    yes.last_online = timezone.now()
-    yes.save()
     category = get_object_or_404(Category, id=category_id, user=request.user)
     category.delete()
     update_task_status(request.user)
@@ -529,9 +487,6 @@ def delete_category(request, category_id):
 @login_required
 def delete_account(request, user_id):
     user = get_object_or_404(CustomUser, id=user_id)
-    yes = Activity.objects.get(user=request.user)
-    yes.last_online = timezone.now()
-    yes.save()
     if user.is_superuser:
         return HttpResponse("<div class=\"container\" align =\"center\"><h1>: ERROR :</h1></div><center><h2><br>Admin accounts can only be deleted from <a href = \"http://127.0.0.1:8000/admin/\">ADMIN</a> page.</h2></center>")
     
@@ -592,11 +547,15 @@ class ExportPDF(View):
         response = HttpResponse(content_type='application/pdf')
         response['Content-Disposition'] = 'attachment; filename="tasks.pdf"'
 
-        pisa_status = pisa.CreatePDF(template.render(context), dest=response)
+        html_content = template.render(context)
 
-        if pisa_status.err:
-            return HttpResponse('We had some errors <pre>' + template.render(context) + '</pre>')
-        
+        # Generate PDF using WeasyPrint
+        pdf_file = BytesIO()
+        HTML(string=html_content).write_pdf(pdf_file)
+
+        response.write(pdf_file.getvalue())
+        pdf_file.close()
+
         return response
 
 
