@@ -1,0 +1,260 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Categories</title>
+    <script src="https://kit.fontawesome.com/02d677a9c5.js" crossorigin="anonymous"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-KK94CHFLLe+nY2dmCWGMq91rCGa5gtU4mk92HdvYe+M/SXH301p5ILy+dN9+nJOZ" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}">
+    <link rel="icon" type="image/png" href="{% static 'favicon/favicon.ico' %}">
+    <style>
+        ::placeholder {
+            opacity: 0.5 !important;
+        }
+    </style>
+</head>
+<body>
+{% include 'base.html' %}
+<div class="container my-3">
+    <div class="categoryBtnContainer">
+        <button id="addCategoryBtn"class="btn">Add Category</button>
+        <button id="showCategoriesBtn"class="btn active">Show Categories</button>
+    </div>
+    <div class="section">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="message fade-out {% if forloop.counter == 1 %}top-15{% else %}top-dynamic{% endif %}">
+                    {% if message.extra_tags == 'categorySuccess' %}
+                        <div class="success form-control-wrapper">
+                            <i class="fas fa-check-circle" style="font-size: 24px; margin-right: 10px;"></i>
+                            {{ message }}
+                        </div>
+                    {% elif message.extra_tags == 'categoryError' %}
+                        <div class="error form-control-wrapper">
+                            <i class="fas fa-times-circle" style="font-size: 24px; margin-right: 10px;"></i>
+                            {{ message }}
+                        </div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        {% endif %}
+        <!-- Add Category Section -->
+        <div class="addCategorySection">
+            <div class="d-flex justify-content-center">
+                <div style="width: 800px;">
+                    <form method="POST" action="/categories/add/">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <div class="row">
+                                <div class="col"> <label for="category" class="form-label">Category Name :</label> </div>
+                                <div class="col"> <div class="char-counter"><span id="categoryCount">0</span>/50</div> </div>
+                            </div>
+                            <input type="text" class="form-control" id="category" name="name" placeholder="EX : HOME" required oninput="updateCharCount('category', 'categoryCount', 50)">
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-add">Add</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Show Categories Section -->
+        <div class="showCategoriesSection">
+            <div id="category-accordion">
+                {% for category in categories %}
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center mode" id="category-heading-{{ category.id }}">
+                        <h5 class="mb-0">
+                            <button class="btn btn-link category-name-wrapper" data-toggle="collapse" data-target="#category-collapse-{{ category.id }}" aria-expanded="true" aria-controls="category-collapse-{{ category.id }}">
+                                <span class="category-name">{{ category.name }}</span>
+                                <span class="category-count">: [{{ category.tasks.count }}]</span>
+                            </button>
+                        </h5>
+                        <a href="{% url 'delete_category' category.id %}" class="btn btn-danger btn-sm delete-link">{% if category.name == 'Others' %}Delete Tasks{% else %}Delete{% endif %}</a>
+                    </div>
+                    <div id="category-collapse-{{ category.id }}" class="collapse" aria-labelledby="category-heading-{{ category.id }}" data-parent="#category-accordion">
+                        <div class="card-body mode">
+                            <div class="table-responsive">
+                                <table class="table table-hover" border="1" style="border-color:#161B22;">
+                                    <thead>
+                                        <tr class="table-dark">
+                                            <th scope="col">Title</th>
+                                            <th scope="col">Created On</th>
+                                            <th scope="col">Due/Completed Date</th>
+                                            <th scope="col">Priority</th>
+                                            <th scope="col">Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for task in category.tasks.all|dictsortreversed:"important" %}
+                                        <tr class="task-row" data-toggle="modal" data-target="#taskModal{{ task.id }}">
+                                            <td title="{{ task.taskTitle }}">{{ task.taskTitle }}</td>
+                                            <td>{{ task.createdDate | date:'d - m - y | h:i A' }}</td>
+                                            <td {% if task.status == 'Completed' %} title="Completed Date" {% else %} title="Due Date" {% endif %}>
+                                                {% if task.status == 'Completed' %}
+                                                    {{ task.completedDate | date:'d - m - Y | H:i A' }}
+                                                {% elif task.status == 'Pending' %}
+                                                    {{ task.dueDate | date:'d - m - Y | H:i A' }}
+                                                {% elif task.status == 'Overdue' %}
+                                                    {{ task.dueDate | date:'d - m - Y | H:i A' }}
+                                                {% endif %}
+                                            </td>
+                                            <td>{{ task.get_important_display }}</td>
+                                            <td>{{ task.get_status_display }}</td>
+                                        </tr>
+                                        <div class="modal fade task-modal" id="taskModal{{ task.id }}" tabindex="-1" aria-labelledby="taskModal{{ task.id }}" aria-hidden="true">
+                                            <div class="modal-dialog modal-dialog-centered overflow-hidden">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h5 class="modal-title" id="taskModal{{ task.id }}"title="{{ task.taskTitle }}"style="max-width: 220px;">{{ task.taskTitle }}</h5>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="filter:invert(0.30);"></button>
+                                                    </div>
+                                                    <div class="modal-body text-start">
+                                                        <div class="row">
+                                                            <div class="col-md-6">
+                                                                <p class="field-name">Created Date</p>
+                                                                <p class="field">{{ task.createdDate|date:'d/m/Y | h:i A' }}</p>
+                                                            </div>
+                                                            <div class="col-md-6">
+                                                                <p class="field-name">Due Date</p>
+                                                                <p class="field">{{ task.dueDate|date:'d/m/Y | h:i A' }}</p>
+                                                            </div>
+                                                        </div>
+                                                        <div class="row">
+                                                            <div class="col-md-6">
+                                                                <p class="field-name">Category</p>
+                                                                <div class="field" title="{{ task.category }}">
+                                                                    <span class="truncate-text">{{ task.category }}</span>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-md-6">
+                                                                <p class="field-name">Status</p>
+                                                                <p class="field">{{ task.status }}</p>
+                                                            </div>
+                                                        </div>
+                                                        <div class="row">
+                                                            <div class="col-md-12">
+                                                                <p class="field-name">Description</p>
+                                                                <div class="des-field">{{ task.description|linebreaksbr|safe }}</div>
+                                                            </div>
+                                                        </div>                                
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>   
+                                        {% empty %}
+                                        <tr>
+                                            <td colspan="5" align="center">No tasks available for this category.</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // message transition 
+    document.addEventListener('DOMContentLoaded', (event) => {
+        const messages = document.querySelectorAll('.message');
+        messages.forEach((message) => {
+            setTimeout(() => {
+                message.classList.add('fade');
+                setTimeout(() => {
+                    message.remove();
+                }, 1000);
+            }, 5000);
+        });
+    });
+    // if 2 messages, then second one will be 2px after first one end point
+    window.addEventListener('DOMContentLoaded', (event) => {
+        const messages = document.querySelectorAll('.message');
+        if (messages.length > 1) {
+            const firstMessage = messages[0];
+            const secondMessage = messages[1];
+
+            const firstMessageHeight = firstMessage.offsetHeight;
+            const gap = 2;
+
+            secondMessage.style.top = `calc(15% + ${firstMessageHeight + gap}px)`;
+        }
+    });
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const addCategoryBtn = document.getElementById('addCategoryBtn');
+        const showCategoriesBtn = document.getElementById('showCategoriesBtn');
+        const addCategorySection = document.querySelector('.addCategorySection');
+        const showCategoriesSection = document.querySelector('.showCategoriesSection');
+
+        function addCategory() {
+            addCategorySection.style.display = 'block';
+            showCategoriesSection.style.display = 'none';
+            if (showCategoriesBtn.classList.contains('active')) {
+                addCategoryBtn.classList.add('active');
+                showCategoriesBtn.classList.remove('active');
+            }
+        }
+        function showCategories() {
+            addCategorySection.style.display = 'none';
+            showCategoriesSection.style.display = 'block';
+            if (addCategoryBtn.classList.contains('active')) {
+                addCategoryBtn.classList.remove('active');
+                showCategoriesBtn.classList.add('active');
+            }
+        }
+        addCategoryBtn.addEventListener('click', function() {
+            addCategory();
+        });
+        showCategoriesBtn.addEventListener('click', function() {
+            showCategories();
+        });
+        
+        if(window.location.pathname === '/categories/add/') {
+            addCategoryBtn.click();
+        } else {
+            showCategoriesBtn.click();
+        }
+        // Initialize collapses and modal toggle
+    });
+    $('.collapse').removeClass('show');
+    $('.btn-link').click(function() {
+        $(this).toggleClass('collapsed');
+        var target = $(this).data('target');
+        $(target).collapse('toggle');
+    });
+
+    $(".task-row").click(function(e) {
+        e.preventDefault();
+        $(".modal").modal("hide");
+        var modalId = $(this).attr("data-target");
+        $(modalId).modal("show");
+    });
+
+    $(".modal .close").click(function() {
+        $(this).closest(".modal").modal("hide");
+    });
+    function updateCharCount(inputId, counterId, maxChars) {
+        var inputElement = document.getElementById(inputId);
+        var counterElement = document.getElementById(counterId);
+        var charCount = inputElement.value.length;
+
+        counterElement.textContent = charCount;
+
+        if (charCount > maxChars) {
+            inputElement.value = inputElement.value.substring(0, maxChars);
+            counterElement.textContent = maxChars;
+        }
+    }
+</script>
+</body>
+</html>

@@ -1,0 +1,54 @@
+# Todo List
+
+## Account creation:
+
+-> Fill up username, email (both of them needs to be unique & username has some built in policy)
+-> Fill up password fields according to policy (min 1 special , min 1 number, min 8 characters)
+-> Name, phone, address fields are optional
+-> After signup, user will be redirected to profile where he will be asked to verify email,
+   clicking on the x icon will send a verfication email to user
+-> Email verification request can be done 5 times, after that will be 1 hour cooldown.
+-> 'Others' category will be created by default
+
+## Account login:
+
+-> As usual username and password for login with 7 days remember me optional
+
+## Forgot Password:
+
+-> Fill username & email correctly and search for Account
+-> If account found & email is verified, then user can send a password reset mail to that mail address
+-> Clicking on that link will check for authenticity & redirect to reset password page if success
+-> NOTE : reset link & password reset page both has 20 minutes time for each, after that link will be invalidated
+-> Clicking on the cancel button in reset password page will invalidate the reset link
+-> User can request for password reset 5 times , after that will be 1 hour cooldown
+
+## Profile :
+
+-> Profile picture can be stored one at a time, 
+   when a new one is uploaded old one is deleted and new one is saved after resizing
+-> deleting user will remove the user media folder
+-> Enable Email Notification will be disabled, false if email is not verified
+
+## Task:
+
+-> duedate will be set as 5 minutes from present time by default, it must be in future
+-> Notification time & Email notification will be disabled if Enabled Email Notification is False
+-> Limit for Notification Time is (min : 2 minutes & max: duedate - 2 minutes)
+-> A thread will check for task notification time every 1 minutes,
+   if it fulfills all conditions then a mail will be sent to user mailbox with link to running-tasks
+-> Clicking on the task row will show modal with task information
+-> Long title,category names are shorten, that can be seen by hovering over them
+
+## Category:
+
+-> 'Others' will be default and can't be deleted, only tasks can be deleted from it
+-> Tasks are shown for each category and has same modal features as running,completed tasks
+
+## Others:
+
+-> Admin panel has moved to localhost:800/todo-Admin
+-> User id and Task id will be used as encrypted id for security
+
+
+                     In the end i am sorry for those bugs, bad code & poor design.

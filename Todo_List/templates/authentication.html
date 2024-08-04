@@ -1,0 +1,539 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.13.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.18.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="preload" href ="{% static 'background/unsplash-bg.jpg' %}" as="image">
+    <link rel="icon" href="{% static 'favicon/favicon.ico' %}" type="image/x-icon">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}">
+    <title>Authentication</title>
+    <style>
+        .auth-body {
+            font-family: Arial, sans-serif;
+            margin: 0 auto;
+            padding: 0;
+            overflow: hidden;
+            height: 100vh;
+            background-image: url('{% static "background/unsplash-bg.jpg" %}');
+            background-size: 100% 100%;
+            background-repeat: no-repeat;
+            background-position: center;
+            form {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                ::placeholder {
+                    color:grey;
+                }
+                .additional-info input {
+                    color:grey;
+                }
+                .input-container {
+                    position: relative;
+                    width: 200px;
+                    margin: 10px;
+                    padding-right : 40px;
+                }
+                .input-container .fa-user, .fa-lock, .fa-envelope, .fa-phone, .fa-address-card {
+                    position: absolute;
+                    left: 10px;
+                    top: 50%;
+                    transform: translateY(-50%);
+                    color: grey;
+                    font-size:14px;
+                }
+                .input-container .fa-eye-slash, .fa-eye, .fa-exclamation-circle {
+                    position: absolute;
+                    right: 10px;
+                    top: 50%;
+                    transform: translateY(-50%);
+                    color: grey;
+                    cursor: pointer;
+                    font-size:14px;
+                }
+                .input-container .fa-exclamation-circle {
+                    color: red;
+                }
+                .input-container input {
+                    width: 100%;
+                    padding: 10px 10px 10px 30px;
+                    margin: 0;
+                    border: none;
+                    border-bottom: 1px solid black;
+                    outline: none;
+                    background: rgba(255, 255, 255, 0.01);
+                }
+                .input-container input.wrong,
+                .input-container input.signupWrongUser,
+                .input-container input.signupWrongEmail,
+                .input-container input.signupWrongPass {
+                    border-bottom: 1px solid red;
+                }
+
+                .input-container input.wrong:focus,
+                .input-container input.signupWrongUser:focus,
+                .input-container input.signupWrongEmail:focus,
+                .input-container input.signupWrongPass:focus {
+                    border-bottom: 3px solid red;
+                }
+
+                .input-container input:focus {
+                    border-bottom: 3px solid black;
+                }
+                .input-container input:blur {
+                    border-bottom: 1px solid black;
+                }
+            }
+            .container__ .button-container {
+                display: flex;
+                justify-content: center;
+                align-items:center;
+                width: 100%;
+                padding-right: 10px;
+                button[type="submit"] {
+                    width: 80px;
+                    padding: 10px;
+                    margin: 10px;
+                    border-radius: 50px;
+                    border: 1px solid black;
+                    background-image: radial-gradient(circle, #5c0067 0%, #00d4ff 100%);
+                    color: white;
+                    cursor: pointer;
+                    font-weight: bold;
+                }
+            }
+            .next-button-container {
+                display: flex;
+                justify-content: flex-end;
+                width: 100%;
+                padding-right: 10px;
+                .nextBtn {
+                    width: 60px;
+                    padding: 6px;
+                    margin: 10px;
+                    border-radius: 50px;
+                    border: 1px solid black;
+                    background-image: radial-gradient(circle, #5c0067 0%, #00d4ff 100%);
+                    color: white;
+                    cursor: pointer;
+                    font-weight: bold;
+                }
+
+            }
+            .back-link {
+                display: block;
+                text-align: left;
+                font-size: 12px;
+                color: blue;
+                cursor: pointer;
+            }
+            .forgot-link {
+                display: block;
+                text-align: center;
+                padding-top : 10px;
+                font-size: 12px;
+                color: blue;
+                cursor: pointer;
+            }
+            h2 {
+                text-align: center;
+                background: linear-gradient(90deg, #48ff00, #00ffd5, #002bff, #7a00ff, #ff00e7, #ff0000);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                font-size: 24px;
+                font-weight: bold;
+            }
+            label {
+                display: block;
+                margin-bottom: 10px;
+                text-align: center;
+                padding-bottom : 20px;
+                font-size: 14px;
+            }
+            input[type="checkbox"] {
+                left : -50px;
+                position: relative;
+                margin-right : -40px;
+                margin-left : -50px;
+                text-align: center;
+                border : 2px solid black;
+            }
+        }
+    </style>
+</head>
+<body class="auth-body">
+    <div class="section">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="my-3 message fade-out {% if forloop.counter == 1 %}top-15{% else %}top-dynamic{% endif %}">
+                    {% if message.extra_tags == 'authSuccess' or message.extra_tags == 'resetPassSuccess' %}
+                        <div class="success form-control-wrapper">
+                            <i class="fas fa-check-circle" style="font-size: 24px; margin-right: 10px;"></i>
+                            {{ message }}
+                        </div>
+                    {% elif message.extra_tags == 'authError' %}
+                        <div class="error form-control-wrapper">
+                            <i class="fas fa-times-circle" style="font-size: 24px; margin-right: 10px;"></i>
+                            {{ message }}
+                        </div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        {% endif %}
+    </div>
+    <div class="container__">
+        <!-- buttons for toggling to signin & signup -->
+        <div class="btnContainer_">
+            <button id="signinBtn">Sign In</button>
+            <button id="signupBtn">Sign Up</button>
+        </div>
+        <div class="section_">
+            <div class="signin">
+                <h2>Sign In</h2>
+                <form class="auth form" method="post" action="/signin/">
+                    {% csrf_token %}
+                    <!-- username & password field if username is not valid -->
+                    {% if wrongBoth %}
+                        <div class="input-container">
+                            <i class="fa fa-user"></i>
+                            <input type="text" id="signinUser"name="username"class="wrong" placeholder="Username"value="{{ userName }}" onchange="changeBorder(this)"
+                                title="Invalid username or password"
+                            >
+                        </div>
+                        <div class="input-container">
+                            <i class="fa fa-lock"></i>
+                            <input type="password" id="signinPassword" name="password"class="wrong" placeholder="Password" onchange="changeBorder(this)"
+                                title="Invalid username or password"
+                            >
+                            <i class="fa fa-eye-slash" id="eye"></i>
+                        </div>
+                    <!-- username & password field that shows if user submits valid username but wrong password -->
+                    {% elif wrongPass %}
+                        <div class="input-container">
+                            <i class="fa fa-user"></i>
+                            <input type="text" id="signinUser"name="username" placeholder="Username" value="{{ userName }}">
+                        </div>
+                        <div class="input-container">
+                            <i class="fa fa-lock"></i>
+                            <input type="password" id="signinPassword" class="wrong" name="password" placeholder="Password" onchange="changeBorder(this)"
+                                title="Wrong Password! Try Again"
+                            >
+                            <i class="fa fa-eye-slash" id="eye"></i>
+                        </div>
+                    {% else %}
+                    <!-- username & password field that shows if user didn't submit any data -->
+                        <div class="input-container">
+                            <i class="fa fa-user"></i>
+                            <input type="text" id="signinUser"name="username" placeholder="Username">
+                        </div>
+                        <div class="input-container">
+                            <i class="fa fa-lock"></i>
+                            <input type="password" id="signinPassword" name="password" placeholder="Password">
+                            <i class="fa fa-eye-slash" id="eye"></i>
+                        </div>
+                    {% endif %}
+                    <!-- Remember user for 7 days after login if not logout in that period -->
+                    <label for="remember_me">
+                        <input type="checkbox" name="remember_me" id="remember_me">Remember me
+                    </label>
+                    <!-- it saves the desired page url if unauthorised user tries to use any pages & redirects to that page after login -->
+                    {% if request.GET.next %}
+                        <input type="hidden" name="next" value="{{ request.GET.next }}"/>
+                    {% endif %}
+                    <div class="button-container">    
+                        <button type="submit">Sign In</button>
+                    </div>
+                </form>
+                <!-- Forgot Password link for verified email users-->
+                <a href="/account/find/" class="forgot-link">Forgot password?</a>
+            </div>
+            <!--   Sign Up Section, hidden by default, can be accessed by url or signup button  -->
+            <div class="signup">
+                <h2>Sign Up</h2>
+                <form class="auth form" method="post" action="/signup/">
+                    {% csrf_token %}
+                    <div class="required-info">
+                        <!-- Username Field with field validation check on blur event -->
+                        <div id="userinfo">
+                            <div class="input-container">
+                                <i class="fa fa-user"></i>
+                                <input type="text" id="username" name="username" placeholder="Username*" 
+                                    class="{{ form.username.errors|yesno:'signupWrongUser,' }}"
+                                    title="{% for error in form.username.errors %}{{ error }}{% endfor %}"
+                                    onblur="validateField(this, 'username')" onchange="changeBorder(this)"
+                                >
+                                <i class="fas fa-exclamation-circle" id="usernameErrorIcon" style="display: none;" title="Username already exists"onclick="showAlert('username')"></i>
+                            </div>
+                            <!-- Email Field with field validation check on blur event -->
+                            <div class="input-container">
+                                <i class="fa fa-envelope"></i>
+                                <input type="email" id="email" name="email" placeholder="Email*"
+                                    class="{{ form.email.errors|yesno:'signupWrongEmail,' }}"
+                                    title="{% for error in form.email.errors %}{{ error }}{% endfor %}"
+                                    onblur="validateField(this, 'email')" onchange="changeBorder(this)"
+                                >
+                                <i class="fas fa-exclamation-circle" id="emailErrorIcon" style="display: none;" title="Email already exists"onclick="showAlert('email')"></i>
+                            </div>
+                        </div>
+                        <!-- Password Policy -->
+                        <div class="password-policy" id="password-policy">
+                            <p>Password policy</p>
+                            <ul>
+                                <li id="length" class="invalid">At least 8 characters</li>
+                                <li id="number" class="invalid">At least one number</li>
+                                <li id="special" class="invalid">At least one special character</li>
+                            </ul>
+                        </div>
+                        <div id="passinfo">
+                            <!-- Password field, Password Policy depends on this -->
+                            <div class="input-container">
+                                <i class="fa fa-lock"></i>
+                                <input type="password" id="password1" name="password1" placeholder="Password*" 
+                                    class="{{ form.password1.errors|yesno:'signupWrongPass,' }}"
+                                    title="{% for error in form.password1.errors %}{{ error }}{% endfor %}"
+                                >
+                                <i class="fa fa-eye-slash" id="eye1"></i>
+                            </div>
+                            <!-- Confirm Password -->
+                            <div class="input-container">
+                                <i class="fa fa-lock"></i>
+                                <input type="password" id="password2" name="password2" placeholder="Confirm Password*" 
+                                    class="{{ form.password2.errors|yesno:'signupWrongPass,' }}"
+                                    title="{% for error in form.password2.errors %}{{ error }}{% endfor %}"
+                                >
+                                <i class="fa fa-eye-slash" id="eye2"></i>
+                            </div>
+                        </div>
+                        <div class="next-button-container">
+                            <button type="button" class="nextBtn" onclick="showNext()">Next</button>
+                        </div>
+                    </div>
+                    <div class="additional-info"style="display:none;">
+                        <div class="input-container">
+                            <i class="fa fa-user"></i>
+                            <input type="text" name="firstName" placeholder="First Name" value="Name1">
+                        </div>
+                        <div class="input-container">
+                            <i class="fa fa-user"></i>
+                            <input type="text" name="lastName" placeholder="Last Name" value="Name2">
+                        </div>
+                        <div class="input-container">
+                            <i class="fa fa-phone"></i>
+                            <input type="text" name="phone" placeholder="Phone" value="0123456789">
+                        </div>
+                        <div class="input-container">
+                            <i class="fa fa-address-card"></i>
+                            <input type="text" name="address" placeholder="Address" value="Earth">
+                        </div>
+                        <!-- submit button, disabled by default. If password maintains Password Policy then get enabled -->
+                        <div class="button-container">
+                            <button type="submit"class="submitBtn" disabled title="Fill the  *  fields correctly"style="cursor:not-allowed;">Sign Up</button>
+                        </div>
+                    </div>
+                </form>
+                <a class="back-link"onclick="hideNext()"style="display:none;">Back</a>
+            </div>
+        </div>
+    </div>
+    <script>
+        // message transition 
+        document.addEventListener('DOMContentLoaded', (event) => {
+            const messages = document.querySelectorAll('.message');
+            messages.forEach((message) => {
+                setTimeout(() => {
+                    message.classList.add('fade');
+                    setTimeout(() => {
+                        message.remove();
+                    }, 1000);
+                }, 5000);
+            });
+        });
+        // if 2 messages, then second one will be 2px after first one end point
+        window.addEventListener('DOMContentLoaded', (event) => {
+            const messages = document.querySelectorAll('.message');
+            if (messages.length > 1) {
+                const firstMessage = messages[0];
+                const secondMessage = messages[1];
+
+                const firstMessageHeight = firstMessage.offsetHeight;
+                const gap = 2;
+
+                secondMessage.style.top = `calc(15% + ${firstMessageHeight + gap}px)`;
+            }
+        });
+
+        // toggle between signin & signup by buttons
+        document.addEventListener('DOMContentLoaded', function() {
+            const signinBtn = document.getElementById('signinBtn');
+            const signupBtn = document.getElementById('signupBtn');
+            const signin = document.querySelector('.signin');
+            const signup = document.querySelector('.signup');
+
+            function showSignIn() {
+                signin.style.display = 'block';
+                signup.style.display = 'none';
+                signinBtn.style.backgroundColor = 'black';
+                signinBtn.style.color = 'white';
+                signupBtn.style.backgroundColor = 'white';
+                signupBtn.style.color = 'black';
+            }
+
+            function showSignUp() {
+                signin.style.display = 'none';
+                signup.style.display = 'block';
+                signupBtn.style.backgroundColor = 'black';
+                signupBtn.style.color = 'white';
+                signinBtn.style.backgroundColor = 'white';
+                signinBtn.style.color = 'black';
+            }
+
+            signinBtn.addEventListener('click', function() {
+                showSignIn();
+            });
+        
+            signupBtn.addEventListener('click', function() {
+                showSignUp();
+                hideNext();
+            });
+            // on load show signin section
+            if(window.location.pathname === '/signup/') {
+                signupBtn.click();
+            } else {
+                signinBtn.click();
+            }
+        });
+        // Show/Hide password
+        const eyes = document.querySelectorAll('.fa-eye-slash, .fa-eye');
+        eyes.forEach(eye => {
+            eye.addEventListener('click', () => {
+                const input = eye.previousElementSibling;
+                if (input.type === 'password') {
+                    input.type = 'text';
+                    eye.classList.remove('fa-eye-slash');
+                    eye.classList.add('fa-eye');
+                } else {
+                    input.type = 'password';
+                    eye.classList.remove('fa-eye');
+                    eye.classList.add('fa-eye-slash');
+                }
+            });
+        });
+        function showNext() {
+            document.querySelector('.required-info').style.display = 'none';
+            document.querySelector('.additional-info').style.display = 'block';
+            document.querySelector('.back-link').style.display = 'block';
+        }
+        function hideNext() {
+            document.querySelector('.required-info').style.display = 'block';
+            document.querySelector('.additional-info').style.display = 'none';
+            document.querySelector('.back-link').style.display = 'none';
+        }
+        // changes wrong field design if user changes the data
+        function changeBorder(element) {
+            if (element.classList.contains('wrong')) {
+                element.classList.remove('wrong');
+            }
+        }
+        // hides message on click
+        function hideMessageBox(element){
+            element.style.display = 'none';
+        }
+        // Checks if the password is according to Password Policy
+        const password1 = document.getElementById('password1');
+        const passwordPolicy = document.getElementById('password-policy');
+        const lengthRequirement = document.getElementById('length');
+        const numberRequirement = document.getElementById('number');
+        const specialRequirement = document.getElementById('special');
+        const userinfo = document.getElementById('userinfo');
+        password1.addEventListener('focus', () => {
+            passwordPolicy.style.display = 'block';
+            userinfo.style.display = 'none';
+        });
+
+        password1.addEventListener('blur', () => {
+            passwordPolicy.style.display = 'none';
+            userinfo.style.display = 'block';
+        });
+
+        password1.addEventListener('keyup', () => {
+            const value = password1.value;
+
+            if (value.length >= 8) {
+                lengthRequirement.classList.remove('invalid');
+                lengthRequirement.classList.add('valid');
+            } else {
+                lengthRequirement.classList.remove('valid');
+                lengthRequirement.classList.add('invalid');
+            }
+
+            if (/\d/.test(value)) {
+                numberRequirement.classList.remove('invalid');
+                numberRequirement.classList.add('valid');
+            } else {
+                numberRequirement.classList.remove('valid');
+                numberRequirement.classList.add('invalid');
+            }
+
+            if (/[^A-Za-z0-9]/.test(value)) {
+                specialRequirement.classList.remove('invalid');
+                specialRequirement.classList.add('valid');
+            } else {
+                specialRequirement.classList.remove('valid');
+                specialRequirement.classList.add('invalid');
+            }
+
+            if (lengthRequirement.classList.contains('valid')  && numberRequirement.classList.contains('valid') && specialRequirement.classList.contains('valid')) {
+                document.querySelector('.submitBtn').removeAttribute('disabled');
+                document.querySelector('.submitBtn').style.cursor = 'pointer';
+                document.querySelector('.submitBtn').style.color= 'white';
+                document.querySelector('.submitBtn').title = '';
+            } else {
+                document.querySelector('.submitBtn').setAttribute('disabled', 'disabled');
+                document.querySelector('.submitBtn').style.cursor = 'not-allowed';
+                document.querySelector('.submitBtn').style.color= 'grey';
+                document.querySelector('.submitBtn').title = 'Password does not meet the requirements';
+            }
+        });
+        // sends ajax req to backend for exiting username & email check
+        async function validateField(input, type) {
+            const value = input.value;
+            const errorIcon = type === 'username' ? document.getElementById('usernameErrorIcon') : document.getElementById('emailErrorIcon');
+            
+            if (value === "") {
+                errorIcon.style.display = 'none';
+                input.classList.remove('signupWrongUser', 'signupWrongEmail');
+                return;
+            }
+            try {
+                const response = await fetch(`/validate-field/?type=${type}&value=${value}`);
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                const data = await response.json();
+                
+                if (data.exists) {
+                    errorIcon.style.display = 'inline';
+                    input.classList.add(type === 'username' ? 'signupWrongUser' : 'signupWrongEmail');
+                } else {
+                    errorIcon.style.display = 'none';
+                    input.classList.remove(type === 'username' ? 'signupWrongUser' : 'signupWrongEmail');
+                }
+            } catch (error) {
+                console.error('Failed to fetch:', error);
+            }
+        }
+        // show alert message if click on x-circled icon
+        function showAlert(type) {
+            if(type == 'username'){
+                alert('username already exists! choose a different one');
+            } else {
+                alert('email already exists! choose a different one');
+            }
+        }
+    </script>
+</body>
+</html>

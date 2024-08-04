@@ -1,0 +1,354 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Find Account</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.13.0/css/all.min.css">
+    <link rel="preload" href ="{% static 'background/unsplash-bg.jpg' %}" as="image">
+    <link rel="icon" type="image/png" href="{% static 'favicon/favicon.ico' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0 auto;
+            padding: 0;
+            overflow: hidden;
+            height: 100vh;
+            background-image: url('{% static "background/unsplash-bg.jpg" %}');
+            background-size: 100% 100%;
+            background-repeat: no-repeat;
+            background-position: center;
+        }
+        .container_ {
+            top: 50%;
+            left: 50%;
+            position: absolute;
+            transform: translate(-50%, -50%);
+            margin: 0 auto;
+            flex-direction: column;
+            border: 1px solid black;
+            padding: 20px 10px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.7);
+            box-shadow: 0 0 11px rgba(0, 0, 255, .2),
+                    0 0 6px rgba(255, 255, 255, .5),
+                    0 0 16px rgba(128, 0, 128, .5);
+            overflow: hidden;
+            width:280px;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            ::placeholder {
+                color:grey;
+            }
+            .input-container {
+                position: relative;
+                width: 200px;
+                margin: 10px;
+                padding-right : 40px;
+            }
+            .input-container .fa-user, .fa-envelope {
+                position: absolute;
+                left: 10px;
+                top: 50%;
+                transform: translateY(-50%);
+                color: grey;
+            }
+            .input-container input {
+                width: 100%;
+                padding: 10px 10px 10px 30px;
+                margin: 0;
+                border: none;
+                border-bottom: 1px solid black;
+                outline: none;
+                background: rgba(255, 255, 255, 0.01);
+            }
+            .input-container input:focus {
+                border-bottom: 3px solid black;
+            }
+            .input-container input:blur {
+                border-bottom: 1px solid black;
+            }
+            .input-container input::placeholder {
+                color: grey;
+            }
+        }
+        .input-container input.wrong {
+            border-bottom: 1px solid red;
+        }
+        .input-container input.wrong:focus {
+            border-bottom: 3px solid red;
+        }
+        .findAccountBtn {
+            width: 80px;
+            padding: 10px;
+            margin: 10px;
+            border-radius: 50px;
+            border: 1px solid black;
+            background-image: radial-gradient(circle, #5c0067 0%, #00d4ff 100%);
+            color: white;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .back-link {
+            display: block;
+            text-align: left;
+            padding-top : 10px;
+            padding-left : 10px;
+            font-size: 14px;
+            color: blue;
+            cursor: pointer;
+            text-decoration : none;
+            width: 20%;
+        }
+        h2 {
+            text-align: center;
+            background: linear-gradient(90deg, #48ff00, #00ffd5, #002bff, #7a00ff, #ff00e7, #ff0000);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-size: 24px;
+            font-weight: bold;
+        }
+        .image-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding:2px;
+            img {
+                width: 150px;
+                height: 150px;
+                border-radius:50%;
+            }
+        }
+        .searchResult {
+            .input-container {
+                position: relative;
+                width: 200px;
+                margin: 10px;
+                padding-right : 40px;
+            }
+            .input-container .fa-user, .fa-envelope {
+                position: absolute;
+                left: 10px;
+                top: 50%;
+                transform: translateY(-50%);
+                color: grey;
+            }
+            .input-container input {
+                width: 100%;
+                padding: 10px 10px 10px 30px;
+                margin: 0;
+                border: none;
+                border-bottom: 1px solid black;
+                outline: none;
+                background: rgba(255, 255, 255, 0.01);
+            }
+            .input-container input.wrong {
+                border-bottom: 1px solid red;
+            }
+            .btnContainer {
+                display: flex;
+                justify-content: space-between;
+                font-weight: bold;
+                .hiddenBtn {
+                    background : transparent;
+                    color : blue;
+                    border : none;
+                    font-weight : bold;
+                    cursor : pointer;
+                    padding-top : 10px;
+                    font-size : 14px;
+                }
+                .back-link {
+                    display: block;
+                    text-align: left;
+                    padding-top : 10px;
+                    padding-left : 10px;
+                    font-size: 14px;
+                    color: blue;
+                    cursor: pointer;
+                    text-decoration : none;
+                }
+                .notAllowed {
+                    color : grey;
+                }
+            }
+            h3 {
+                text-align: center;
+                background: linear-gradient(90deg, #48ff00, #00ffd5, #002bff);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                font-size: 24px;
+                font-weight: bold;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="section">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="my-3 message fade-out {% if forloop.counter == 1 %}top-15{% else %}top-dynamic{% endif %}">
+                    {% if message.extra_tags == 'findAccountSuccess' or message.extra_tags == 'resetLinkSuccess' %}
+                        <div class="success form-control-wrapper">
+                            <i class="fas fa-check-circle" style="font-size: 24px; margin-right: 10px;"></i>
+                            {{ message }}
+                        </div>
+                    {% elif message.extra_tags == 'findAccountError' or message.extra_tags == 'resetLinkError' %}
+                        <div class="error form-control-wrapper">
+                            <i class="fas fa-times-circle" style="font-size: 24px; margin-right: 10px;"></i>
+                            {{ message }}
+                        </div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        {% endif %}
+    </div>
+    <div class="container_">
+        {% if not user %}
+            <div class="searchAccount">
+                <h2>Find Account</h2>
+                <form method="post" action="/account/find/"enctype="multipart/form-data">
+                    {% csrf_token %}
+                    {% if messages %}{% for message in messages %}
+                    {% if message.extra_tags == 'findAccountError' %}
+                        {% if userName %}
+                            <div class="input-container">
+                                <i class="fa fa-user"></i>
+                                <input type="text" name="username" id="username" placeholder="Username"value="{{ username }}">
+                            </div>
+                            <div class="input-container">
+                                <i class="fa fa-envelope"></i>
+                                <input type="email" name="email"class="wrong" id="email" placeholder="Email"value="{{ email }}"onchange="changeBorder(this)">
+                            </div>
+                        {% else %}
+                            <div class="input-container">
+                                <i class="fa fa-user"></i>
+                                <input type="text" name="username"class="wrong" id="username" placeholder="Username"value="{{ username }}"onchange="changeBorder(this)">
+                            </div>
+                            <div class="input-container">
+                                <i class="fa fa-envelope"></i>
+                                <input type="email" name="email"class="wrong" id="email" placeholder="Email"value="{{ email }}"onchange="changeBorder(this)">
+                            </div>
+                        {% endif %}
+                    {% else %}
+                        <div class="input-container">
+                            <i class="fa fa-user"></i>
+                            <input type="text" name="username" id="username" placeholder="Username">
+                        </div>
+                        <div class="input-container">
+                            <i class="fa fa-envelope"></i>
+                            <input type="email" name="email" id="email" placeholder="Email">
+                        </div>
+                    {% endif %}
+                    {% endfor %}
+                    {% else %}
+                        <div class="input-container">
+                            <i class="fa fa-user"></i>
+                            <input type="text" name="username" id="username" placeholder="Username">
+                        </div>
+                        <div class="input-container">
+                            <i class="fa fa-envelope"></i>
+                            <input type="email" name="email" id="email" placeholder="Email">
+                        </div>
+                    {% endif %}
+                    <button type="submit"class="findAccountBtn">Search</button>
+                </form>
+                <a href="/signin/" class="back-link">Back</a>
+            </div>
+        {% elif user %}
+            <div class="searchResult">
+                <h3>Account Found !</h3>
+                <div class="image-container">
+                    <img src="{{ user.profile.profilePicture.url }}" alt="Profile Picture">
+                </div>
+                <div class="input-container">
+                    <i class="fa fa-user"></i>
+                    <input type="text" name="username" id="username" placeholder="Username" value="{{ user.username }}" disabled>
+                </div>
+                <div class="input-container">
+                    <i class="fa fa-user"></i>
+                    <input type="text" name="fullName" id="fullName" placeholder="Full Name" value="{{ user.firstName }} {{ user.lastName }}" disabled>
+                </div>
+                <div class="input-container">
+                    <i class="fa fa-envelope"></i>
+                    {% if emailVerified %}
+                        <input type="email" name="email" id="email" placeholder="Email" value="{{ user.email }}" disabled>
+                    {% elif not emailVerified %}
+                        <input type="email" name="email"class="wrong"title="Email is not verified!" id="email" placeholder="Email" value="{{ user.email }}" disabled>
+                    {% endif %}
+                </div>
+                <div class="btnContainer">
+                    <a href="/account/find/" class="back-link">Back</a>
+                    {% if emailVerified %}
+                        <form method="POST" action="/account/send-reset-link/">
+                            {% csrf_token %}
+                            <input type="hidden" name="username" value="{{ user.username }}">
+                            <input type="hidden" name="email" value="{{ user.email }}">
+                            <button type="submit"class="hiddenBtn">Reset Password</button>
+                        </form>
+                    {% elif not emailVerified %}
+                        <button type="button"class="hiddenBtn notAllowed" onclick="showAlert()">Reset Password</button>
+                    {% endif %}
+                </div>
+            </div>
+        {% endif %}
+    </div>
+    <script>
+        // message transition 
+        document.addEventListener('DOMContentLoaded', (event) => {
+            const messages = document.querySelectorAll('.message');
+            messages.forEach((message) => {
+                setTimeout(() => {
+                    message.classList.add('fade');
+                    setTimeout(() => {
+                        message.remove();
+                    }, 1000);
+                }, 5000);
+            });
+        });
+        // if 2 messages, then second one will be 2px after first one end point
+        window.addEventListener('DOMContentLoaded', (event) => {
+            const messages = document.querySelectorAll('.message');
+            if (messages.length > 1) {
+                const firstMessage = messages[0];
+                const secondMessage = messages[1];
+
+                const firstMessageHeight = firstMessage.offsetHeight;
+                const gap = 2;
+
+                secondMessage.style.top = `calc(15% + ${firstMessageHeight + gap}px)`;
+            }
+        });
+
+
+        const findSection = document.getElementById('searchAccount');
+        const resultSection = document.getElementById('searchResult');
+        const disabledBtn = document.querySelector('.notAllowed');
+        document.addEventListener('DOMContentLoaded', function(){
+            if({{ user }}){
+                findSection.style.display = 'none';
+                resultSection.style.display = 'block';
+            } else {
+                findSection.style.display = 'block';
+                resultSection.style.display = 'none';
+            }
+        })
+        
+        function showAlert() {
+            alert('Email is not verified!');
+        }
+        function changeBorder(element) {
+            if (element.classList.contains('wrong')) {
+                element.classList.remove('wrong');
+            }
+        }
+        
+    </script>
+</body>
+</html>

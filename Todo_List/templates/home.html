@@ -1,0 +1,93 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Todo List - Home</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}">   
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://pro.fontawesome.com/releases/v5.10.0/css/all.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="icon" type="image/png" href="{% static 'favicon/favicon.ico' %}">
+    <style>
+        .container {
+            top: 95%;
+            left: 50%;
+            transform: translate(-50%, -95%);
+            position: absolute;
+        }
+        .jumbotron {
+            background-color: rgba(255, 255, 255, 0.8);
+            padding: 3rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        dark-mode .jumbotron {
+            background-color: white;
+            color: white;
+        }
+        .title {
+            font-size: 3rem;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 1.5rem;
+        }
+        .description {
+            font-size: 1.5rem;
+            color: #555;
+            margin-bottom: 2rem;
+        }
+        .btn-get-started {
+            background-color:blue;
+            border-color: black;
+            font-size: 1.25rem;
+            font-weight: bold;
+            padding: 0.75rem 1.5rem;
+        }
+        .row i {
+            color: black;
+        }
+        .dark-mode .row i {
+            color: white;
+        }
+    </style> 
+</head>
+<body>
+    {% include 'base.html' %}
+    <div class="jumbotron text-center">
+        <h1 class="title">Todo List</h1>
+        <p class="description">Stay organized and get things done with our simple and efficient Todo list app.</p>
+        {% if user.is_authenticated %}
+            <a href="/createTask" class="btn btn-primary btn-get-started">Get Started</a>
+        {% else %}
+            <a href="/signin" class="btn btn-primary btn-get-started">Get Started</a>
+        {% endif %}
+    </div>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-6 mx-auto d-flex flex-column align-items-center justify-content-end">
+                <h5 class="section-heading">Contact Us</h5>
+                <br>
+                <div class="row mb-0">
+                    <div class="col d-flex align-items-center">
+                        <a href="mailto:nahiannazeeb19@gmail.com">
+                            <i class='fas fa-envelope' style='font-size:30px'></i>
+                        </a>
+                    </div>
+                    <div class="col d-flex align-items-center">
+                        <a href="https://t.me/n4h14n" target="_blank" class="text-decoration-none">
+                            <i class="fab fa-telegram"style="font-size:30px;"></i>
+                        </a>
+                    </div>
+                    <div class="col d-flex align-items-center">
+                        <a href="https://www.linkedin.com/in/nahiannazeeb/" target="_blank" class="text-decoration-none"><i class="fab fa-linkedin fa-2x"></i></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz" crossorigin="anonymous"></script>
+</body>
+</html>

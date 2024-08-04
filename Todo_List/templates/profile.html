@@ -1,0 +1,451 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="{% static 'favicon/favicon.ico' %}">
+    <script src="https://kit.fontawesome.com/02d677a9c5.js" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.13.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-KK94CHFLLe+nY2dmCWGMq91rCGa5gtU4mk92HdvYe+M/SXH301p5ILy+dN9+nJOZ" crossorigin="anonymous">
+    <title>Account</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}">
+    <style>
+        body {
+            color: #8e9194;
+            background-color: #f4f6f9;
+        }
+        .avatar-xl img {
+            width: 150px;
+            height: 150px;
+        }
+        .rounded-circle {
+            border-radius: 50% !important;
+        }
+        img {
+            vertical-align: middle;
+            border-style: none;
+        }
+        .text-muted {
+            color: #aeb0b4 !important;
+            font-weight: 300;
+            ::-webkit-scrollbar {
+                display: none;
+            }
+        }
+
+        .form-control {
+            display: block;
+            width: 100%;
+            height: calc(1.5em + 0.75rem + 2px);
+            padding: 0.375rem 0.75rem;
+            font-size: 0.875rem;
+            font-weight: 400;
+            line-height: 1.5;
+            color: #4d5154;
+            background-color: #ffffff;
+            background-clip: padding-box;
+            border: 1px solid #eef0f3;
+            border-radius: 0.25rem;
+            transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+        }
+        #bio {
+            background-color: #f4f6f9;
+            color: #8e9194;
+            resize: none;
+            border: none;
+            overflow-x: hidden;
+            cursor: pointer;
+        }
+        .dark-mode #bio {
+            resize: none;
+            border: none;
+            background-color: #161B22;
+            overflow-x: hidden;
+            cursor: pointer;
+        }
+        .dark-mode {
+            #id_profile_picture, #id_first_name, #id_last_name, #id_email, #id_address, #id_phone, #id_gender, #enableEmailNotifications, #bio {
+                color: rgba(200, 200, 200, 0.8);
+            }
+            #id_profile_picture:focus, #id_first_name:focus, #id_last_name:focus, #id_email:focus, #id_address:focus, #id_phone:focus, #id_gender:focus, #enableEmailNotifications:focus, #bio:focus {
+                color: #f4f6f9;
+            }
+        }
+        .passSection input.wrong {
+            border: 1px solid red;
+        }
+        .passSection input.wrong:focus {
+            border:none;
+            border:3px solid red;
+        }
+        ::-webkit-scrollbar {
+            display: none;
+        }
+    </style>
+</head>
+<body>    <!--  This page design is mostly inspired from  "https://www.bootdey.com/snippets/view/profile-edit-settings" -->
+    {% include 'base.html' %}
+    <div class="container">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="message fade-out {% if forloop.counter == 1 %}top-15{% else %}top-dynamic{% endif %}">
+                    {% if message.extra_tags == 'profileInfoSuccess' %}
+                        <div class="success form-control-wrapper">
+                            <i class="fas fa-check-circle" style="font-size: 24px; margin-right: 10px;"></i>
+                            {{ message }}
+                        </div>
+                    {% elif message.extra_tags == 'profilePassSuccess' %}
+                        <div class="success form-control-wrapper">
+                            <i class="fas fa-check-circle" style="font-size: 24px; margin-right: 10px;"></i>
+                            {{ message }}
+                        </div>
+                    {% else %}
+                        <div class="error form-control-wrapper">
+                            <i class="fas fa-times-circle" style="font-size: 24px; margin-right: 10px;"></i>
+                            {{ message }}
+                        </div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        {% endif %}
+        <div class="row justify-content-center">
+            <div class="col-12 col-lg-10 col-xl-8 mx-auto">
+                <div class="my-4">
+                    <form method="POST" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <div class="row mt-5 align-items-center">
+                            <div class="col-md-3 text-center mb-5">
+                                <div class="avatar avatar-xl">
+                                    <img src="{{ user.profile.profilePicture.url }}" alt="..." class="avatar-img rounded-circle" />
+                                </div>
+                            </div>
+                            <div class="col">
+                                <div class="row align-items-center">
+                                    <div class="col-md-7 ml-2">
+                                        <h4 class="mb-1">{{ user.firstName }} {{ user.lastName }}</h4>
+                                        <p class="small mb-3"><span class="badge badge-dark">{{ user.username }}</span></p>
+                                        <div class="char-counter" hidden><span id="bioCount">0</span>/220</div>
+                                    </div>
+                                </div>
+                                <div class="row mb-4">
+                                    <div class="col-md-7">
+                                        <p class="text-muted">
+                                            <textarea id="bio"name="bio" class="form-control" rows="5" oninput="updateCharCount('bio', 'bioCount', 220)" onclick="showCounter()">{{ user.profile.bio }}</textarea>
+                                        </p>
+                                    </div>
+                                    <div class="col">
+                                        <p class="small mb-0 text-muted">{{ user.address }}</p>
+                                        <p class="small mb-0 text-muted">{{ user.phone }}</p>
+                                        <p class="small mt-2 text-muted">Task Completed: {{ user.profile.completedTasksCount }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <hr class="my-4" />
+                        <div class="form-group">
+                            <label for="id_profile_picture" class="form-label">Profile Picture:</label>
+                            <input type="file" class="form-control" name="profilePicture" id="id_profile_picture">
+                            {% if form.profilePicture.errors %}
+                                <div class="errors">
+                                    {% for error in form.profilePicture.errors %}
+                                        <p>{{ error }}</p>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group col-md-6">
+                                <label for="id_first_name">Firstname</label>
+                                <input type="text" id="id_first_name" name="firstName" class="form-control" value="{{ user.firstName }}" />
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label for="id_last_name">Lastname</label>
+                                <input type="text" id="id_last_name" name="lastName" class="form-control" value="{{ user.lastName }}" />
+                            </div>
+                        </div>
+                        <div class="form-group position-relative">
+                            <label for="id_email">Email</label>
+                            <div class="form-control-wrapper position-relative">
+                                <input type="email" class="form-control {{ form.email.errors|yesno:'wrong,' }}" id="id_email" name="email" value="{{ user.email }}"title="{% for error in form.email.errors %}{{ error }}{% endfor %}" />
+                                {% if user.email_verified %}
+                                    <i class="fas fa-check-circle position-absolute" title="verified" style="right: 10px; top: 50%; transform: translateY(-50%); color: green;"></i>
+                                {% else %}
+                                    <a href="{% url 'send_verification_email' user.encrypted_id %}">
+                                        <i class="fas fa-times-circle position-absolute" title="Not verified" style="color: #FF0000;right: 10px; top: 50%; transform: translateY(-50%);"></i>
+                                    </a>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="id_address">Address</label>
+                            <input type="text" class="form-control" id="id_address" name="address" value="{{ user.address }}" />
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group col-md-5">
+                                <label for="id_phone" class="form-label">Phone</label>
+                                <input type="text" class="form-control" name="phone" id="id_phone" value="{{ user.phone }}"/>
+                            </div>
+                            <div class="form-group col-md-4">
+                                <label for="id_gender">Gender</label>
+                                <select id="id_gender" name="gender" class="form-control">
+                                    <option value="None" {% if user.profile.gender == 'None' %}selected{% endif %}>Rather not say</option>
+                                    <option value="Male" {% if user.profile.gender == 'Male' %}selected{% endif %}>Male</option>
+                                    <option value="Female" {% if user.profile.gender == 'Female' %}selected{% endif %}>Female</option>
+                                    <option value="Other" {% if user.profile.gender == 'Other' %}selected{% endif %}>Other</option>
+                                </select>
+                            </div>
+                            <div class="mb-3 col-md-3" style="margin-top:35px;">
+                                <label for="enableEmailNotifications" class="form-check-label"{% if not user.email_verified%}style="cursor:not-allowed;" title="verify email first!"{% endif %}>Email Task Notifications:</label>
+                                <input type="checkbox" class="form-check-input ml-3" id="enableEmailNotifications" name="enableEmailNotifications"
+                                {% if not user.email_verified %} disabled{% endif %}    
+                                {% if user.profile.enableEmailNotifications %} checked {% endif %}
+                                >
+                            </div>
+                        </div>
+                        <hr class="my-4" />
+                        <div class="passSection">
+                            <div class="row mb-4">
+                                <div class="col-md-6">
+                                    <div class="form-group position-relative">
+                                        <label for="old_password">Old Password</label>
+                                        <div class="form-control-wrapper position-relative">
+                                            <input type="password" class="form-control {{ password_form.old_password.errors|yesno:'wrong,' }}"
+                                                title="{% for error in password_form.old_password.errors %}{{ error }}{% endfor %}" id="old_password" name="old_password" onchange="changeBorder(this)" onblur="changeClass()">
+                                            <i class="fa fa-eye-slash position-absolute"id="eye" style="right: 10px; top: 50%; transform: translateY(-50%);font-size:12px;"></i>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="new_password1">New Password</label>
+                                        <div class="form-group position-relative">
+                                            <input type="password" class="form-control {{ password_form.new_password1.errors|yesno:'wrong,' }}" 
+                                                title="{% for error in password_form.new_password1.errors %}{{ error }}{% endfor %}" id="new_password1" name="new_password1" onchange="changeBorder(this)" onblur="changeClass()">
+                                            <i class="fa fa-eye-slash position-absolute"id="eye1" style="right: 10px; top: 50%; transform: translateY(-50%);font-size:12px;"></i>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="new_password2">Confirm Password</label>
+                                        <div class="form-group position-relative">
+                                            <input type="password" class="form-control {{ password_form.new_password2.errors|yesno:'wrong,' }}"
+                                                title="{% for error in password_form.new_password2.errors %}{{ error }}{% endfor %}" id="new_password2" name="new_password2" onchange="changeBorder(this)" onblur="changeClass()">
+                                            <i class="fa fa-eye-slash position-absolute"id="eye2" style="right: 10px; top: 50%; transform: translateY(-50%);font-size:12px;"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mt-4"id = "passwordRequirements">
+                                    <p class="mb-2">Password requirements</p>
+                                    <p class="small text-muted mb-2">To create a new password, you have to meet all of the following requirements:</p>
+                                    <ul class="small text-muted pl-4 mb-0">
+                                        <li id ="length">Minimum 8 characters</li>
+                                        <li id ="special">At least one special character</li>
+                                        <li id ="number">At least one number</li>
+                                        <li id ="same">Can’t be the same as a old password</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="button-row">
+                                <button type="submit" class="btn btn-primary">Save Change</button>
+                                <button type="button" class="btn btn-danger delBtn" onclick="showDelete()">Delete Account</button>
+                            </div>
+                        </div>
+                    </form>
+                    <div class="deleteSection p-3 mt-4 border rounded" hidden>
+                        <h5 class="text-danger">Delete Account</h5>
+                        <p class="text-muted">Are you sure you want to delete your account? This action cannot be undone. Please type 'CONFIRM' and enter your password to proceed.</p>
+                        <form method="POST" action="{% url 'delete_account' user.encrypted_id %}">
+                            {% csrf_token %}
+                            <div class="form-group">
+                                <label for="delAccConfirm" class="form-label text-danger">Type 'CONFIRM' to delete your account:</label>
+                                <input type="text" class="form-control" name="delAccConfirm" id="delAccConfirm" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="delAccPassword" class="form-label text-danger">Enter your password to confirm:</label>
+                                <div class="form-group position-relative">
+                                    <input type="password" class="form-control" name="delAccPassword" id="delAccPassword" required>
+                                    <i class="fa fa-eye-slash position-absolute"id="eye3" style="right: 10px; top: 50%; transform: translateY(-50%);font-size:12px;"></i>
+                                </div>
+                            </div>
+                            <div class="d-flex justify-content-between mt-3">
+                                <button type="button" class="btn btn-secondary" onclick="showDelete()">Cancel</button>
+                                {% if user.is_superuser %}
+                                    <button type="" class="btn btn-danger"onclick="showAlert()">Delete Account</button>
+                                {% else %}
+                                    <button type="submit" class="btn btn-danger">Delete Account</button>
+                                {% endif %}
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // message transition 
+        document.addEventListener('DOMContentLoaded', (event) => {
+            const messages = document.querySelectorAll('.message');
+            messages.forEach((message) => {
+                setTimeout(() => {
+                    message.classList.add('fade');
+                    setTimeout(() => {
+                        message.remove();
+                    }, 1000);
+                }, 5000);
+            });
+        });
+        // if 2 messages, then second one will be 2px after first one end point
+        window.addEventListener('DOMContentLoaded', (event) => {
+            const messages = document.querySelectorAll('.message');
+            if (messages.length > 1) {
+                const firstMessage = messages[0];
+                const secondMessage = messages[1];
+
+                const firstMessageHeight = firstMessage.offsetHeight;
+                const gap = 2;
+
+                secondMessage.style.top = `calc(15% + ${firstMessageHeight + gap}px)`;
+            }
+        });
+        // Character count for bio
+        function updateCharCount(inputId, counterId, maxChars) {
+            var inputElement = document.getElementById(inputId);
+            var counterElement = document.getElementById(counterId);
+            var charCount = inputElement.value.length;
+
+            counterElement.textContent = charCount;
+
+            if (charCount > maxChars) {
+                inputElement.value = inputElement.value.substring(0, maxChars);
+                counterElement.textContent = maxChars;
+            }
+        }
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('bio').onfocus = function(){
+                var counter = document.querySelector('.char-counter');
+                counter.hidden = false;
+            }
+            document.getElementById('bio').onblur = function(){
+                var counter = document.querySelector('.char-counter');
+                counter.hidden = true;
+            }
+        });
+        window.onload = function() {
+            updateCharCount('bio', 'bioCount', 220);
+        }
+        function showDelete() {
+            var deleteSection = document.querySelector('.deleteSection');
+            deleteSection.hidden = !deleteSection.hidden;
+            document.getElementById('delAccPassword').value = '';
+            document.getElementById('delAccConfirm').value='';
+            var passSection = document.querySelector('.passSection');
+            passSection.hidden = !passSection.hidden;
+        }
+        function showAlert(){
+            const link = '       localhost:8000/admin/';
+            alert('Admin accounts can only be deleted from \n' + link);
+        }
+        // change border color from red to default if input changes
+        function changeBorder(element) {
+            if (element.classList.contains('wrong')) {
+                element.classList.remove('wrong');
+            }
+        }
+
+        // password requirements check 
+        const password1 = document.getElementById('new_password1');
+        const password2 = document.getElementById('new_password2');
+        const oldPassword = document.getElementById('old_password');
+        const passwordRequirements = document.getElementById('passwordRequirements');
+        const lengthRequirement = document.getElementById('length');
+        const numberRequirement = document.getElementById('number');
+        const specialRequirement = document.getElementById('special');
+        const sameRequirement = document.getElementById('same');
+
+        password1.addEventListener('keyup', () => {
+            const value = password1.value;
+            lengthRequirement.classList.add('invalid');
+            numberRequirement.classList.add('invalid');
+            specialRequirement.classList.add('invalid');
+            sameRequirement.classList.add('invalid');
+            if (value.length >= 8) {
+                lengthRequirement.classList.remove('invalid');
+                lengthRequirement.classList.add('valid');
+            } else {
+                lengthRequirement.classList.remove('valid');
+                lengthRequirement.classList.add('invalid');
+            }
+
+            if (/\d/.test(value)) {
+                numberRequirement.classList.remove('invalid');
+                numberRequirement.classList.add('valid');
+            } else {
+                numberRequirement.classList.remove('valid');
+                numberRequirement.classList.add('invalid');
+            }
+
+            if (/[^A-Za-z0-9]/.test(value)) {
+                specialRequirement.classList.remove('invalid');
+                specialRequirement.classList.add('valid');
+            } else {
+                specialRequirement.classList.remove('valid');
+                specialRequirement.classList.add('invalid');
+            }
+
+            if( oldPassword.value !== value && oldPassword.value.length >= 8 && value.length >= 8) {
+                sameRequirement.classList.remove('invalid');
+                sameRequirement.classList.add('valid');
+            } else {
+                sameRequirement.classList.remove('valid');
+                sameRequirement.classList.add('invalid');
+            }
+            if (lengthRequirement.classList.contains('invalid') ||
+                numberRequirement.classList.contains('invalid')  ||
+                specialRequirement.classList.contains('invalid') || 
+                sameRequirement.classList.contains('invalid') ){
+                    document.querySelector('.btn-primary').setAttribute('disabled','disabled');
+                    document.querySelector('.btn-primary').style.cursor = 'not-allowed';
+                    document.querySelector('.btn-primary').style.backgroundColor= 'grey';
+                    document.querySelector('.btn-primary').title = 'Password do not meet the requirements!';
+            } else {
+                document.querySelector('.btn-primary').removeAttribute('disabled');
+                document.querySelector('.btn-primary').style.cursor = 'pointer';
+                document.querySelector('.btn-primary').style.backgroundColor= '#1F6FD3';
+                document.querySelector('.btn-primary').style.color = 'white';
+                document.querySelector('.btn-primary').title = '';
+            }
+        });
+        function changeClass() {
+            if(oldPassword.value.length === 0 && password1.value.length === 0 && password2.value.length === 0) {
+                document.querySelector('.btn-primary').removeAttribute('disabled');
+                document.querySelector('.btn-primary').style.cursor = 'pointer';
+                document.querySelector('.btn-primary').style.backgroundColor= '#1F6FD3';
+                document.querySelector('.btn-primary').style.color = 'white';
+                document.querySelector('.btn-primary').title = '';
+                lengthRequirement.classList.remove('invalid');
+                specialRequirement.classList.remove('invalid');
+                sameRequirement.classList.remove('invalid');
+                numberRequirement.classList.remove('invalid');
+            }
+        }
+        // password show/hide 
+        const eyes = document.querySelectorAll('.fa-eye-slash, .fa-eye');
+        eyes.forEach(eye => {
+            eye.addEventListener('click', () => {
+                const input = eye.previousElementSibling;
+                if (input.type === 'password') {
+                    input.type = 'text';
+                    eye.classList.remove('fa-eye-slash');
+                    eye.classList.add('fa-eye');
+                } else {
+                    input.type = 'password';
+                    eye.classList.remove('fa-eye');
+                    eye.classList.add('fa-eye-slash');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

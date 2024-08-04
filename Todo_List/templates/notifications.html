@@ -1,0 +1,42 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notifications</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.18.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="icon" type="image/png" href="{% static 'favicon/favicon.ico' %}">
+    <style>
+        .alert:hover {
+            box-shadow: 0 0 11px rgba(33,33,33,.2);
+        }
+        .dark-mode .alert:hover {
+            box-shadow: 0 0 11px rgba(0, 0, 255, .2), 0 0 6px rgba(255, 255, 255, .5), 0 0 16px rgba(128, 0, 128, .5);
+        }
+    </style>
+</head>
+<body>
+    {% include 'base.html' %}
+    <div class="container">
+        <h3 class="text-center"style="padding-top:20px;padding-bottom:10px;">Notifications</h3>
+        <div>
+            {% if notifications %}
+                {% for notification in notifications %}
+                    <div class="alert alert-success alert-dismissible mt-3 text-center" role="alert">
+                        <div class="row">
+                            <div class="col-1">{{ forloop.counter }}</div>
+                            <div class="col-4"style="text-align:left;">{{ notification.date|date:'d-m-y | h:i A' }}</div>
+                            <div class="col-7"style="max-width: 500px;overflow: hidden;text-overflow: ellipsis;white-space: nowrap;"title="{{ notification.name }}">{{ notification.name }}</div>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% endif %}
+            
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

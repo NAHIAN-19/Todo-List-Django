@@ -1,0 +1,206 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Task</title>
+    <script src="https://kit.fontawesome.com/02d677a9c5.js" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.18.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}">
+    <link rel="icon" type="image/png" href="{% static 'favicon/favicon.ico' %}">
+    <style>
+        .form-check-input,
+        .form-control {
+            border : 1px solid grey;
+        }
+        input:disabled {
+            cursor: not-allowed;
+            &:hover {
+                title: "Enable Email Notifications in Profile to use this feature";
+            }
+        }
+    </style>
+</head>
+<body>
+    {% include 'base.html' %}
+    <div class="container my-3"> <!-- fix running_tasks and completed_tasks table for long description,title,category name-->
+        {% if messages %}
+            {% for message in messages %}
+                <div class="message fade-out {% if forloop.counter == 1 %}top-15{% else %}top-dynamic{% endif %}">
+                    {% if message.extra_tags == 'createTaskSuccess' %}
+                        <div class="success form-control-wrapper">
+                            <i class="fas fa-check-circle" style="color: green; font-size: 24px; margin-right: 10px;"></i>
+                            {{ message }}
+                        </div>
+                    {% elif message.extra_tags == 'createTaskError' %}
+                        <div class="error form-control-wrapper">
+                            <i class="fas fa-times-circle" style="color: red; font-size: 24px; margin-right: 10px;"></i>
+                            {{ message }}
+                        </div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        {% endif %}
+        <h3 class="text-center">Create a Task</h3>
+        <div class="d-flex justify-content-center">
+            <div style="width: 800px;">
+                <form method="POST" action="{% url 'Todo_List_App' %}">
+                    {% csrf_token %}
+                    <!-- Task Title of max tength 100 -->
+                    <div class="mb-3">
+                        <div class="row">
+                            <div class="col"> <label for="title" class="form-label">Task Title</label> </div>
+                            <div class="col"> <div class="char-counter"><span id="titleCount">0</span>/100</div> </div>
+                        </div>
+                        <input type="text" class="form-control" id="title" name="title" required oninput="updateCharCount('title', 'titleCount', 100)">
+                    </div>
+                    <!-- Task Description of max length 500 -->
+                    <div class="mb-3">
+                        <div class="row">
+                            <div class="col"> <label for="description" class="form-label">Task Description</label> </div>
+                            <div class="col"> <div class="char-counter"><span id="descCount">0</span>/500</div> </div>
+                        </div>
+                        <textarea class="form-control" id="description" name="description" rows="2" oninput="updateCharCount('description', 'descCount', 500)"></textarea>
+                    </div>
+                    <div class="row mb-3">
+                        <!-- Date-Time field where minimum time can be 5 minutes from now -->
+                        <div class="col">
+                            <label for="dueDate" class="form-label">Due Date</label>
+                            <input type="datetime-local" class="form-control icon-dark-mode" id="dueDate" name="dueDate" value="{{ cur_date|date:'Y-m-d\TH:i' }}" required>
+                        </div>
+                        <!-- Int counter field to set Email Notification Time for the task, default is 4 minutes -->
+                        <div class="col">
+                            <label for="notificationTime" class="form-label">Remind me before <span id="notificationTimeText"></span></label>
+                            <input type="number" id="notificationTime" {% if not user.profile.enableEmailNotifications %}disabled style="cursor: not-allowed;" title="Enable Email Notification in Settings page to use this feature"{% endif %} class="form-control" name="notificationTime" max="4" min="2" value="4" required>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <!-- Category selection part , if no exiting categories found then this part and submit button will be disabled -->
+                        <div class="mb-3 col">
+                            <label for="category" class="form-label">Category</label>
+                            <select class="form-control" id="category" name="category" required>
+                                <option value="{{ othersCategory.id }}" selected>{{ othersCategory.name}}</option>
+                                {% for category in categories %}
+                                    {% if category.id != othersCategory.id %}
+                                        <option value="{{ category.id }}">{{ category.name }}</option>
+                                    {% endif %}
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <!-- Priority selection part, choices are high,medium & low, default is Low -->
+                        <div class="mb-3 col">
+                            <label for="important" class="form-label" style="margin-right:10px;">Priority </label>
+                            <select class="form-select" id="important" name="important">
+                                <option value="Low">Low</option>
+                                <option value="Medium">Medium</option>
+                                <option value="High">High</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <!-- Checkbox for Email Notification , True will send email...False will not, default is false -->
+                        <div class="mb-3 col">
+                            <label for="emailNotification" {% if not user.profile.enableEmailNotifications %}disabled style="cursor: not-allowed;" title="Enable Email Notification in Settings page to use this feature"{% endif %} class="form-check-label" style="margin-right: 10px;">Receive Email Notification :</label>
+                            <input type="checkbox" class="form-check-input" {% if not user.profile.enableEmailNotifications %}disabled{% endif %} id="emailNotification" name="emailNotification">
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-add">Submit</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <script>
+        // message transition 
+        document.addEventListener('DOMContentLoaded', (event) => {
+            const messages = document.querySelectorAll('.message');
+            messages.forEach((message) => {
+                setTimeout(() => {
+                    message.classList.add('fade');
+                    setTimeout(() => {
+                        message.remove();
+                    }, 1000);
+                }, 5000);
+            });
+        });
+        // if 2 messages, then second one will be 2px after first one end point
+        window.addEventListener('DOMContentLoaded', (event) => {
+            const messages = document.querySelectorAll('.message');
+            if (messages.length > 1) {
+                const firstMessage = messages[0];
+                const secondMessage = messages[1];
+
+                const firstMessageHeight = firstMessage.offsetHeight;
+                const gap = 2;
+
+                secondMessage.style.top = `calc(15% + ${firstMessageHeight + gap}px)`;
+            }
+        });
+
+        document.getElementById("notificationTimeText").textContent = "4 minutes";
+        function toUTCString(localDate) {
+            return new Date(localDate.getTime() - localDate.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+        }
+        document.getElementById('dueDate').addEventListener('change', function() {
+            var userHasNotificationsEnabled = {{ user.profile.enableEmailNotifications|yesno:"true,false" }};
+            var dueDate = new Date(this.value);
+            var curDate = new Date();
+            var minDate = new Date(curDate.getTime() + 2 * 60 * 1000); 
+
+            if (dueDate < minDate) {
+                this.value = toUTCString(minDate);
+                alert('Due date cannot be in the past. It has been adjusted to 2 minutes from now.');
+                dueDate = minDate;
+            }
+
+            if (userHasNotificationsEnabled) {
+                var differenceInMilliseconds = dueDate - curDate;
+                var differenceInMinutes = Math.floor(differenceInMilliseconds / (1000 * 60));
+
+                document.getElementById("notificationTime").setAttribute("max", differenceInMinutes);
+                document.getElementById("notificationTime").value = '';
+                document.getElementById("notificationTimeText").textContent = `${document.getElementById("notificationTime").value} minutes`;
+
+                if (differenceInMinutes < 3) {
+                    document.getElementById("notificationTime").setAttribute("disabled", true);
+                } else {
+                    document.getElementById("notificationTime").removeAttribute("disabled");
+                }
+            }
+        });
+        
+        document.getElementById('notificationTime').addEventListener('input', function() {
+            var inputMinutes = parseInt(this.value);
+            var maxMinutes = parseInt(this.getAttribute("max"));
+            var minMinutes = parseInt(this.getAttribute("min"));
+            if (inputMinutes > maxMinutes) {
+                this.value = maxMinutes;
+            }
+            if (inputMinutes < minMinutes) {
+                this.value = minMinutes;
+            }
+            document.getElementById("notificationTimeText").textContent = `${this.value} minutes`;
+        });
+
+        function updateCharCount(inputId, counterId, maxChars) {
+            var inputElement = document.getElementById(inputId);
+            var counterElement = document.getElementById(counterId);
+            var charCount = inputElement.value.length;
+
+            counterElement.textContent = charCount;
+
+            if (charCount > maxChars) {
+                inputElement.value = inputElement.value.substring(0, maxChars);
+                counterElement.textContent = maxChars;
+            }
+        }
+    </script>
+    
+</body>
+</html>

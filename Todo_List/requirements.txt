@@ -1,0 +1,5 @@
+cryptography==42.0.8
+Django==5.0.2
+Pillow==10.4.0
+python-dotenv==1.0.1
+weasyprint==62.3

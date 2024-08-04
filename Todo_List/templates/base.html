@@ -1,0 +1,240 @@
+{% load static %}
+
+<link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+<link rel="icon" type="image/png" href="{% static 'favicon/favicon.ico' %}">
+<style>
+    .nav-link .notificationIcon {
+        opacity : 1 !important;
+        color : #FEFEFE;
+        font-size : 20px;
+        margin-top : 5px;
+        padding-bottom : -10px;
+    }
+    .nav-link.active {
+        opacity: 1;
+    }
+    .dropdown-menu {
+        .dark-mode & {
+            background-color : #333 !important;
+            .dropdown-item {
+                .dark-mode & {
+                    color : white !important;
+                }
+            }
+            &:hover .dropdown-item {
+                background-color : #333;
+                color : white;
+            }
+            .activeDropdown {
+                background-color : #444 !important;
+            }
+        }
+        .activeDropdown {
+            background-color : #f8f9fa !important;
+        }
+    }
+    .dark-mode{
+        .form-check-label {
+            color : white !important;
+        }
+        .dropdown-divider {
+            border-top : 1px solid #444 !important;
+        }
+    }
+</style>
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="/home">
+            <img src="/static/background/todo.png" class="rounded-circle" width="30" height="30" alt="todo">
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNavDropdown">
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    {% if user.is_authenticated %}
+                        <a class="nav-link {% if request.path == "/tasks/create/" %}active{% endif %}" aria-current="page" href="/tasks/create">Create</a>
+                    {% else %}
+                        <a class="nav-link" aria-current="page" href="{% url 'signin' %}?next=/tasks/create">Home</a>
+                    {% endif %}
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle {% if request.path == "/tasks/running/" or request.path == "/tasks/completed/" %}active{% endif %}" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        Tasks
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li class="nav-item">
+                            {% if user.is_authenticated %}
+                                <a class="dropdown-item {% if request.path == "/tasks/running/" %}activeDropdown{% endif %}" aria-current="page" href="/tasks/running"style="border-bottom:1px solid #444;">
+                                    <span class="textGlow">Running</span>
+                                </a>
+                            {% else %}
+                                <a class="dropdown-item" aria-current="page" href="{% url 'signin' %}?next=/tasks/running">Running</a>
+                            {% endif %}
+                        </li>
+                        <li class="nav-item">
+                            {% if user.is_authenticated %}
+                                <a class="dropdown-item {% if request.path == "/tasks/completed/" %}activeDropdown{% endif %}" aria-current="page" href="/tasks/completed">Completed</a>
+                            {% else %}
+                                <a class="dropdown-item" aria-current="page" href="{% url 'signin' %}?next=/tasks/completed">Completed</a>
+                            {% endif %}
+                        </li>
+                    </ul>
+                </li>
+                <li class="nav-item">
+                    {% if user.is_authenticated %}
+                        <a class="nav-link {% if request.path == "/categories/add/" or request.path == "/categories/all/" %}active{% endif %}" aria-current="page" href="/categories/all">Category</a>
+                    {% else %}
+                        <a class="nav-link" aria-current="page" href="{% url 'signin' %}?next=/categories/all">Category</a>
+                    {% endif %}
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        Download
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li class="nav-item">
+                            {% if user.is_authenticated %}
+                                <a class="dropdown-item" aria-current="page" href="/tasks/export/pdf"style="border-bottom:1px solid #444;">Export as PDF</a>
+                            {% else %}
+                                <a class="dropdown-item" aria-current="page" href="{% url 'signin' %}?next=/tasks/export/pdf/">Export as PDF</a>
+                            {% endif %}
+                        </li>
+                        <li class="nav-item">
+                            {% if user.is_authenticated %}
+                                <a class="dropdown-item" aria-current="page" href="/tasks/export/csv">Export as CSV</a>
+                            {% else %}
+                                <a class="dropdown-item" aria-current="page" href="{% url 'signin' %}?next=/tasks/export/csv/">Export as CSV</a>
+                            {% endif %}
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item">
+                    <div class="notificationIcon">
+                        {% if user.is_authenticated %}
+                        <a class="nav-link" href="/notifications">
+                            {% if unread_count > 0 %}
+                                <i class="material-icons notificationIcon"title="New Notifications!">notifications_active</i>
+                            {% else %}
+                                <i class="material-icons notificationIcon"title="No New Notifications!">notifications</i>
+                            {% endif %}
+                        </a>
+                        {% else %}
+                        <a class="nav-link" href="{% url 'signin' %}?next=/notifications">
+                            <i class="material-icons notificationIcon"title="No New Notifications!">notifications</i>
+                        </a>
+                        {% endif %}
+                    </div>
+                </li>
+                <li class="nav-item dropdown">
+                {% if user.is_authenticated %}
+                    <a class="nav-link dropdown-toggle no-caret" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <img src="{{ user.profile.profilePicture.url }}" class="rounded-circle altPic" width="25" height="25" alt="Profile Picture">
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                        <li>
+                            <div class="dropdown-header">
+                                <img src="{{ user.profile.profilePicture.url }}" class="rounded-circle" width="30" height="30" alt="Profile Picture">
+                                {{ user.username }}
+                            </div>
+                        </li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li>
+                            {% if user.is_authenticated %}
+                                <a class="dropdown-item {% if request.path == "/account/" %}activeDropdown{% endif %}" href="/account/">
+                                    <i class="bi bi-person-fill"></i>  Profile
+                                </a>
+                            {% else %}
+                                <a class="dropdown-item {% if request.path == "/account/" %}activeDropdown{% endif %}" href="{% url 'signin' %}?next=/account">
+                                    <i class="bi bi-person-fill"></i>  Profile
+                                </a>
+                            {% endif %}
+                        </li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li>
+                            <a class="dropdown-item" href="https://github.com/NAHIAN-19/Todo-List-Django">
+                                <i class="bi bi-info-circle-fill"></i>   About
+                            </a>
+                        </li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li>
+                            <label class="form-check-label" for="themeIcon" id="themeChange" style="margin-left:15px;user-select: none;">
+                                <i id="themeIcon" class="bi" style="cursor: pointer;"></i>
+                                Dark Mode
+                            </label>
+                        </li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li>
+                            <a class="dropdown-item" href="{% url 'logout' %}">
+                                <i class="bi bi-door-closed-fill"></i>  Logout
+                            </a>
+                        </li>
+                    </ul>
+                {% else %}
+                    <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        User
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                        <li><hr class="dropdown-divider"></li>
+                        <li>
+                            <a class="dropdown-item" href="/signin">
+                                <i class="bi bi-person-fill"></i>
+                                    Sign In
+                            </a>
+                        </li>
+                        <li><hr class="dropdown-divider"></li>
+                            <li>
+                            <a class="dropdown-item" href="/signup">
+                                <i class="bi bi-person-plus-fill"></i>
+                                    Sign Up
+                            </a>
+                        </li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li>
+                            <label class="form-check-label" for="themeSwitch" id="themeChange" style="margin-left:15px;user-select: none;">
+                                <i id="themeIcon" class="bi" style="cursor: pointer;"></i>
+                                Dark Mode
+                            </label>
+                        </li> 
+                    </ul>
+                {% endif %}
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+<script>
+    const darkModePref = localStorage.getItem('darkMode');
+    const themeIcon = document.getElementById('themeChange');
+
+    function updateThemeIcon(isDarkMode) {
+        if (isDarkMode) {
+            themeIcon.classList.remove('bi-sun-fill');
+            themeIcon.classList.add('bi-moon-fill');
+            themeIcon.style.color = 'black';
+        } else {
+            themeIcon.classList.remove('bi-moon-fill');
+            themeIcon.classList.add('bi-sun-fill');
+            themeIcon.style.color = 'black';
+        }
+    }
+
+    if (darkModePref === 'true') {
+        document.body.classList.add('dark-mode');
+        updateThemeIcon(true);
+    } else {
+        updateThemeIcon(false);
+    }
+
+    themeIcon.addEventListener('click', function () {
+        const isDarkMode = document.body.classList.toggle('dark-mode');
+        localStorage.setItem('darkMode', isDarkMode);
+        updateThemeIcon(isDarkMode);
+    });
+</script>

@@ -1,0 +1,185 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-KK94CHFLLe+nY2dmCWGMq91rCGa5gtU4mk92HdvYe+M/SXH301p5ILy+dN9+nJOZ" crossorigin="anonymous">
+    <link rel="icon" type="image/png" href="{% static 'favicon/favicon.ico' %}">
+    <title>Task Report</title>
+    <style>
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 14px;
+            margin: 0;
+            padding: 0;
+        }
+        h1 {
+            text-align: center;
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+        th, td {
+            text-align: center;
+            padding: 8px;
+            word-wrap: break-word;
+            max-width: 150px;
+            word-break: break-all;
+            white-space: normal;
+        }
+        th {
+            background-color: #f2f2f2;
+            border: 1px solid #888;
+            text-align: center;
+        }
+        .total-task {
+            text-align: center;
+            font-size: 20px;
+            font-weight: bold;
+            margin-top: 20px;
+        }
+        .profile-table {
+            margin: 20px auto;
+            border-collapse: separate;
+            border-spacing: 10px;
+            border: none;
+        }
+        .profile-table td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            background-color: #f9f9f9;
+        }
+        .profile-image {
+            border-radius: 50%;
+            max-width: 200px;
+            max-height: 200px;
+            border: 5px solid #fff;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            display: flex;
+            margin: auto;
+        }
+        .des {
+            font-size: 14px;
+            text-align: center;
+            margin-top: 5px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .task-group {
+            page-break-inside: avoid;
+            margin-bottom: 10px;
+        }
+        .taskTable {
+            border-spacing: 0;
+            border-collapse: collapse;
+        }
+        .taskTable td, .taskTable th {
+            border: 1px solid #000;
+        }
+        .group_ {
+            page-break-inside: avoid;
+        }
+        .group_ table {
+            width: 100%;
+            border-spacing: 0;
+            border-collapse: collapse;
+        }
+        .group_ table th, .group_ table td {
+            border: 1px solid #000;
+        }
+        .profile-table td.info {
+            text-align: left;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+    <h1>Task Report of || {{ user.username }} ||</h1>
+    {% if profile_picture_base64 %}
+        <table class="profile-table">
+            <tr>
+                <td rowspan="5"><img class="profile-image" src="data:image/png;base64,{{ profile_picture_base64 }}"></td>
+                <td class="info"><strong>Username  : </strong> {{ user.username }}</td>
+            </tr>
+            <tr>
+                <td class="info"><strong>Full Name : </strong> {{ user.firstName }} {{ user.lastName }}</td>
+            </tr>
+            <tr>
+                <td class="info"><strong>Email     : </strong> {{ user.email }}</td>
+            </tr>
+            <tr>
+                <td class="info">{% if user.phone %}<strong>Phone     : </strong> {{ user.phone }}{% else %}<strong>Phone:</strong> Not Available{% endif %}</td>
+            </tr>
+            <tr>
+                <td class="info">{% if user.address %}<strong>Address   : </strong> {{ user.address }}{% else %}<strong>Address:</strong> Not Available{% endif %}</td>
+            </tr>
+        </table>
+    {% endif %}
+    <div>
+        <p class="total-task"><strong>Total Tasks: {{ tasks|length }}</strong></p>
+    </div>
+    <table class="taskTable">
+        <tr>
+            <th scope="col" colspan="5">Title</th>
+        </tr>
+        <tr>
+            <th scope="col" colspan="5">Category</th>
+        </tr>
+        <tr>
+            <th scope="col">Created Date</th>
+            <th scope="col">Due Date</th>
+            <th scope="col">Completed Date</th>
+            <th scope="col">Important</th>
+            <th scope="col">Status</th>
+        </tr>
+        {% for task in tasks %}
+            <tr class="task-group group_">
+                <div style="page-break-inside:avoid;position:relative;">
+                    <table class="taskTable" border="1">
+                        <tr class="task-group group_">
+                            <td colspan="5">{{ task.taskTitle }}</td>
+                        </tr>
+                        <tr class="task-group group_">
+                            <td colspan="5">{{ task.category.name }}</td>
+                        </tr>
+                        <tr class="task-group group_">
+                            <td>
+                                <center>
+                                {{ task.createdDate | date:"d-m-y" }}<br>
+                                {{ task.createdDate | date:"h:i A" }}
+                                </center>
+                            </td>
+                            <td>
+                                <center>
+                                {{ task.dueDate | date:"d-m-y" }}<br>
+                                {{ task.dueDate | date:"h:i A" }}
+                                </center>
+                            </td>
+                            <td>
+                                <center>
+                                {% if task.completedDate %}
+                                    {{ task.completedDate | date:"d-m-y" }}<br>
+                                    {{ task.completedDate | date:"h:i A" }}
+                                {% else %}
+                                    <b> N/A </b>
+                                {% endif %}
+                                </center>
+                            </td>
+                            <td><center>{{ task.get_important_display }}</center></td>
+                            <td>{{ task.get_status_display }}</td>
+                        </tr>
+                        <tr class="task-group group_">
+                            <td colspan="5">
+                                <div class="des">Description</div>
+                                <div style="text-align:center;">{{ task.description }}</div>
+                            </td>
+                        </tr>
+                    </table>
+                <div>
+            </tr>    
+        {% endfor %}
+    </table>
+</body>
+</html>
