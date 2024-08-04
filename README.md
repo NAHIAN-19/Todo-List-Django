@@ -46,7 +46,7 @@ To get started with the Todo_List Django Web App, you can clone the repository f
    python generate_keys.py
 
 6. Check .env file and follow the link for Email setup
-   ```bash
+
    <a href="https://www.geeksforgeeks.org/setup-sending-email-in-django-project/">Geekforgeeks email setup in django</a>
 
 7. Run database migrations:
