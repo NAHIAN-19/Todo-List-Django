@@ -1,0 +1,165 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.13.0/css/all.min.css">
+    <style>
+        body {
+            background-color: #000;
+            color: #fff;
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 90vh;
+        }
+        .form {
+            background-color: #fff;
+            color: #000;
+            padding: 30px;
+            border-radius: 10px;
+            max-width: 400px;
+            text-align: center;
+        }
+        input[type="text"],
+        input[type="email"],
+        input[type="password"] {
+            width: 100%;
+            padding: 10px;
+            margin-left:-10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            outline: none;
+        }
+
+        .input-group {
+            position: relative;
+        }
+
+        .input-group i {
+            position: absolute;
+            right: -5px;
+            top: 35%;
+            down: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+        }
+        
+        input[type="submit"] {
+            background-color: #000;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .signup-link {
+            color: black;
+            text-decoration: none;
+        }
+        .signup-link:hover {
+            text-decoration: underline;
+        }
+        .alert-box {
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        .alert-box.alert-danger {
+            background-color: #ff0000;
+            color: #ffffff;
+            border: 2px solid #ff0000;
+        }
+        .alert-box.alert-success {
+            background-color: #00ff00;
+            color: #ffffff;
+            border: 2px solid #00ff00;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <form class="form" method="post">
+            <h2>Sign up</h2>
+            {% csrf_token %}
+            <input type="text" name="username" placeholder="Username" required>
+            {% if form.username.errors %}
+                {% for error in form.username.errors %}
+                    <div class="alert-box alert-danger">
+                        {{ error }}<br>
+                    </div>
+                {% endfor %}
+            {% endif %}
+            <input type="email" name="email" placeholder="Email" required>
+            {% if form.email.errors %}
+                {% for error in form.email.errors %}
+                    <div class="alert-box alert-danger">
+                        {{ error }}<br>
+                    </div>
+                {% endfor %}
+            {% endif %}
+            <input type="text" name="first_name" placeholder="First Name" required>
+            <input type="text" name="last_name" placeholder="Last Name" required>
+            <input type="text" name="phone" placeholder="Phone" required>
+            <input type="text" name="address" placeholder="Address" required>
+            <div class="input-group">
+                <input type="password" name="password1" placeholder="Password" required>
+                <i class="fa fa-eye toggle-password" id="eye1"></i>
+            </div>
+            <div class="input-group">
+                <input type="password" name="password2" placeholder="Confirm Password" required>
+                <i class="fa fa-eye toggle-password" id="eye2"></i>
+            </div>
+            {% if form.password1.errors %}
+                {% for error in form.password1.errors %}
+                    <div class="alert-box alert-danger">
+                        {{ error }}<br>
+                    </div>
+                {% endfor %}
+            {% endif %}
+            {% if form.password2.errors %}
+                {% for error in form.password2.errors %}
+                    <div class="alert-box alert-danger">
+                        {{ error }}<br>
+                    </div>
+                {% endfor %}
+            {% endif %}
+            <input type="submit" value="Sign Up">
+            <p>Already have an account? <a href="{% url 'signin' %}"style="color:blue;"><b>Sign in</b></a></p>
+            {% if messages %}
+                <div class="text-center mt-3">
+                    {% for message in messages %}
+                        <div class="alert-box {% if message.tags == 'error' %}alert-danger{% elif message.tags == 'success' %}alert-success{% endif %}">
+                            {{ message }}<br>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </form>
+    </div>
+    <script>
+        const eyes = document.querySelectorAll('.toggle-password');
+        const passwords = [document.querySelector('input[name="password1"]'), document.querySelector('input[name="password2"]')];
+    
+        eyes.forEach((eye, index) => {
+            eye.addEventListener('click', () => {
+                if (passwords[index].type === 'password') {
+                    passwords[index].type = 'text';
+                    eye.classList.add('fa-eye-slash');
+                } else {
+                    passwords[index].type = 'password';
+                    eye.classList.remove('fa-eye-slash');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

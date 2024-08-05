@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-KK94CHFLLe+nY2dmCWGMq91rCGa5gtU4mk92HdvYe+M/SXH301p5ILy+dN9+nJOZ" crossorigin="anonymous">
+    <title>Task Report</title>
+    <style>
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 14px;
+            margin: 0;
+            padding: 0;
+        }
+        h1 {
+            text-align: center;
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+        th, td {
+            text-align: left;
+            padding: 8px;
+            word-wrap: break-word;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        .total-task {
+            text-align: center;
+            font-size: 20px;
+            font-weight: bold;
+            margin-top: 20px;
+        }
+        .profile-table {
+            margin: 20px auto;
+            border-collapse: separate;
+            border-spacing: 10px;
+        }
+        .profile-table td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            background-color: #f9f9f9;
+        }
+        .profile-image {
+            border-radius: 50%;
+            max-width: 200px;
+            height: 200px;
+            border: 5px solid #fff;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .des {
+            font-size: 14px;
+            text-align: center;
+            margin-top: 5px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        ._p {
+            left : 50%;
+            top : 95%;
+            position: absolute;
+            transform: translate(-50%, -50%);
+            text-decoration: none;
+            color : #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+    <h1>Task Report of || {{ user.username }} ||</h1>
+    {% if profile_picture_base64 %}
+    <table class="profile-table">
+        <tr>
+            <td rowspan="5"><img class="profile-image" src="data:image/png;base64,{{ profile_picture_base64 }}"></td>
+            <td><strong>Username:</strong> {{ user.username }}</td>
+        </tr>
+        <tr>
+            <td><strong>Full Name:</strong> {{ user.first_name }} {{ user.last_name }}</td>
+        </tr>
+        <tr>
+            <td><strong>Email:</strong> {{ user.email }}</td>
+        </tr>
+        <tr>
+            <td>{% if user.phone %}<strong>Phone:</strong> {{ user.phone }}{% else %}<strong>Phone:</strong> Not Available{% endif %}</td>
+        </tr>
+        <tr>
+            <td>{% if user.address %}<strong>Address:</strong> {{ user.address }}{% else %}<strong>Address:</strong> Not Available{% endif %}</td>
+        </tr>
+    </table>
+    {% endif %}
+    <div>
+        <p class="total-task"><strong>Total Tasks: {{ tasks|length }}</strong></p>
+    </div>
+    <table border="1">
+        <thead>
+            <tr>
+                <th scope="col">Title</th>
+                <th scope="col">Category</th>
+                <th scope="col">Created Date</th>
+                <th scope="col">Due Date</th>
+                <th scope="col">Completed Date</th>
+                <th scope="col">Important</th>
+                <th scope="col">Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for task in tasks %}
+            <tr>
+                <td>{{ task.taskTitle }}</td>
+                <td>{{ task.category.name }}</td>
+                <td>
+                    <center>
+                    {{ task.createdDate | date:"d-m-y" }}<br>
+                    {{ task.createdDate | date:"h:i A" }}
+                    </center>
+                </td>
+                <td>
+                    {{ task.dueDate | date:"d-m-y" }}<br>
+                    {{ task.dueDate | date:"h:i A" }}
+                </td>
+                <td>
+                    <center>
+                    {% if task.completedDate %}
+                        {{ task.completedDate | date:"d-m-y" }}<br>
+                        {{ task.completedDate | date:"h:i A" }}
+                    {% else %}
+                        <b> N/A </b>
+                    {% endif %}
+                    </center>
+                </td>
+                <td><center>{% if task.important %}Yes{% else %}No{% endif %}</center></td>
+                <td>{{ task.status }}</td>
+            </tr>
+            <tr>
+                <td colspan="7">
+                    <div class="des">Description</div>
+                    <div style="text-align:center;">{{ task.description }}</div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <p class="_p"><a href="https://github.com/NAHIAN-19/Todo-List-Django">Thank You</a></p>
+</body>
+</html>
