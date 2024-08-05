@@ -1,8 +1,6 @@
 <h1 align="center">Todo List Web App</h1>
 
-![Create Task](https://github.com/NAHIAN-19/Todo-List-Django/blob/main/Screenshots/Create_task.png "Create Task")
-
-![Create Task](https://github.com/NAHIAN-19/Todo-List-Django/blob/master/Screenshots/create-task.png "Create Task")
+![Create Task](https://github.com/NAHIAN-19/Todo-List-Django/blob/main/Screenshots/create-task.png "Create Task")
 
 ## Table of Contents
 - [Tech Stack](#tech_stack)
@@ -48,7 +46,6 @@ To get started with the Todo_List Django Web App, you can clone the repository f
    python generate_keys.py
 
 6. Check .env file and follow the link for Email setup
-
    <a href="https://www.geeksforgeeks.org/setup-sending-email-in-django-project/">Geekforgeeks email setup in django</a>
 
 7. Run database migrations:

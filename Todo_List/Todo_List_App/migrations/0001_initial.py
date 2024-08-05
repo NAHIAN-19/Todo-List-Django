@@ -79,7 +79,7 @@ class Migration(migrations.Migration):
             name='Profile',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('profile_picture', models.ImageField(default='profile_pictures/default.jpg', upload_to=Todo_List_App.models.profile_picture_path)),
+                ('profile_picture', models.ImageField(default='profile_pictures/default.jpg', upload_to=Todo_List_App.models.PathAndRename)),
                 ('completed_tasks_count', models.PositiveIntegerField(default=0)),
                 ('first_name', models.CharField(blank=True, max_length=30)),
                 ('last_name', models.CharField(blank=True, max_length=30)),
