@@ -46,7 +46,7 @@
         <h3 class="text-center">Create a Task</h3>
         <div class="d-flex justify-content-center">
             <div style="width: 800px;">
-                <form method="POST" action="{% url 'Todo_List_App' %}">
+                <form method="POST" action="{% url 'create_task' %}">
                     {% csrf_token %}
                     <!-- Task Title of max tength 100 -->
                     <div class="mb-3">
