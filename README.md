@@ -2,6 +2,10 @@
 
 ![Create Task](https://github.com/NAHIAN-19/Todo-List-Django/blob/main/Screenshots/create-task.png "Create Task")
 
+## Live Link: [Todo List](https://todo19.vercel.app/)
+
+*Please note that the PDF download feature is different in the live version due to additional dependencies required by WeasyPrint.*
+
 ## Table of Contents
 - [Tech Stack](#tech_stack)
 - [Installation](#installation)
