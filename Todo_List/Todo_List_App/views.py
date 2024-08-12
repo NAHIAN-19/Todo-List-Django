@@ -655,7 +655,7 @@ def notifications(request):
 
 #######################this function is used for ADDING task for that user
 @login_required
-def Todo_List_App(request):
+def create_task(request):
     categories = Category.objects.filter(user=request.user)
     othersCategory = Category.objects.filter(name='Others', user=request.user).first()
     cur_date_ = timezone.now()
