@@ -59,7 +59,7 @@
         <h1 class="title">Todo List</h1>
         <p class="description">Stay organized and get things done with our simple and efficient Todo list app.</p>
         {% if user.is_authenticated %}
-            <a href="/createTask" class="btn btn-primary btn-get-started">Get Started</a>
+            <a href="/tasks/create/" class="btn btn-primary btn-get-started">Get Started</a>
         {% else %}
             <a href="/signin" class="btn btn-primary btn-get-started">Get Started</a>
         {% endif %}
