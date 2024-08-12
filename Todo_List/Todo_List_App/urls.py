@@ -12,7 +12,7 @@ urlpatterns = [
     path('logout/', views.logout_view, name='logout'),
 
     # Task-related URLs
-    path('tasks/create/', views.Todo_List_App, name='Todo_List_App'),
+    path('tasks/create/', views.create_task, name='create_task'),
     path('tasks/running/', views.running_tasks, name='running_tasks'),
     path('tasks/completed/', views.completed_tasks, name='completed_tasks'),
     path('tasks/export/csv/', views.export_tasks, name='export_tasks'),
