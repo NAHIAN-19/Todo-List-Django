@@ -61,7 +61,7 @@
         {% if user.is_authenticated %}
             <a href="/tasks/create/" class="btn btn-primary btn-get-started">Get Started</a>
         {% else %}
-            <a href="/signin" class="btn btn-primary btn-get-started">Get Started</a>
+            <a href="{% url 'signin' %}?next=/tasks/create/" class="btn btn-primary btn-get-started">Get Started</a>
         {% endif %}
     </div>
     <div class="container">
