@@ -1091,7 +1091,10 @@ def delete_category(request, category_id):
         return redirect('all_categories')
     categoryName = category.name
     if categoryName == 'Others':
-        Task.objects.filter(category=category).count()
+        taskCount = Task.objects.filter(category=category).count()
+        if taskCount == 0:
+            messages.error(request, 'Category is empty!',extra_tags='categoryError')
+            return redirect('all_categories')
         Task.objects.filter(category=category).delete()
         messages.success(request, 'Tasks in Others category deleted successfully',extra_tags='categorySuccess')
         notifications = Notifications (
