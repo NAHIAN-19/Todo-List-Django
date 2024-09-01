@@ -4,7 +4,7 @@
 
 ## Live Link: [Todo List](https://todo19.vercel.app/)
 
-*Please note that the PDF download feature is different in the live version due to additional dependencies required by WeasyPrint.*
+*Please note that the PDF download feature is different in the live version due to additional dependencies required by [weasyprint](https://pypi.org/project/weasyprint/).*
 
 ## Table of Contents
 - [Tech Stack](#tech_stack)
@@ -31,7 +31,7 @@ To get started with the Todo_List Django Web App, you can clone the repository f
    ```bash
    git clone https://github.com/NAHIAN-19/Todo-List-Django.git
    
-2. Install the <a href="https://github.com/tschoonj/GTK-for-Windows-Runtime-Environment-Installer/releases/download/2022-01-04/gtk3-runtime-3.24.31-2022-01-04-ts-win64.exe">GTK Installer</a> ( To use weasypdf )
+2. Install the <a href="https://github.com/tschoonj/GTK-for-Windows-Runtime-Environment-Installer/releases/download/2022-01-04/gtk3-runtime-3.24.31-2022-01-04-ts-win64.exe">GTK Installer</a> ( To use weasyprint )
 
 2. Navigate to the project folder:
    ```bash
