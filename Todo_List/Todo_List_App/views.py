@@ -35,7 +35,7 @@ from PIL import Image
 from Todo_List_App.models import (Category, CustomUser, Notifications,
                                 PasswordResetRequest, Profile, Task)
 from weasyprint import HTML
-
+from .tasks import send_welcome_email, create_notification
 from .forms import (CustomSetPasswordForm, PasswordChangeForm, ProfileForm,
                     SignUpForm)
 
@@ -74,48 +74,20 @@ def signup(request):
             user.address = form.cleaned_data['address']
             
             user.save()
-            notifications = Notifications (
-                name = 'Account Created',
-                date = timezone.now(),
-                user = user,
-            )
-            notifications.notificationsCount += 1
-            notifications.save()
-            profile = Profile(user=user)
-            profile_form = ProfileForm(request.POST,request.FILES, instance=profile, user_instance=user)
-            if profile_form.is_valid():
-                profile_form.save()
+            profile, created = Profile.objects.get_or_create(user=user)
+            if created:
+                profile_form = ProfileForm(request.POST,request.FILES, instance=profile, user_instance=user)
+                if profile_form.is_valid():
+                    profile_form.save()
             login(request, user)
             
-            subject = 'Welcome to Todo List'
-            message = f'Hi, thank you for registering in Todo List. You can now create and manage your tasks easily. Enjoy your day! Regards, Todo List Team'
-            email_from = from_email
-            recipient_list = [user.email, ]
-            try:
-                email = EmailMultiAlternatives(
-                    subject,
-                    message,
-                    email_from,
-                    recipient_list,
-                )
-                email.send()
-                notifications = Notifications (
-                    name = 'Welcome Email Sent',
-                    date = timezone.now(),
-                    user = user,
-                )
-            except Exception as e:
-                errorMessage = str(e)
-                print(f"Error sending email: {errorMessage}")
-                notifications = Notifications (
-                    name = 'Welcome Email Sending Failed, {errorMessage}',
-                    date = timezone.now(),
-                    user = user,
-                )
-            notifications.notificationsCount += 1
-            notifications.save()
-            messages.success(request, f'Welcome { user.username }',extra_tags='profileInfoSuccess')
-            messages.success(request, 'Verify email to receive reminder & reset password',extra_tags='profileInfoSuccess')
+            # Trigger background tasks
+            send_welcome_email.delay(user.id)  # Pass the user ID to the Celery task
+            create_notification.delay(user.id, 'Account Created', timezone.now())
+
+            # Success messages
+            messages.success(request, f'Welcome {user.username}', extra_tags='profileInfoSuccess')
+            messages.success(request, 'Verify email to receive reminder & reset password', extra_tags='profileInfoSuccess')
             return redirect('profile')
         else:
             messages.error(request, 'Signup failed',extra_tags='authError')
@@ -726,89 +698,6 @@ def create_task(request):
     
     return render(request, 'createTask.html', context)
 
-################### call task time check and email send function 
-def check_notification_time(delay):
-    next_time = time.time() + delay
-    while True:
-        time.sleep(max(0, next_time - time.time()))
-        try:
-            update_task_status()
-            check_and_send_notifications()
-        except Exception as e:
-            print(f"An error occurred: {e}")
-        
-        if not threading.current_thread().is_alive():
-            break
-
-        next_time += delay
-
-################ send email for task according to set reminder time 
-def check_and_send_notifications():
-    tasks = Task.objects.filter(
-        emailNotification=True,
-        notificationTime__isnull=False,  
-        sent_reminder=False,   
-        status=Task.PENDING,
-        user__email_verified=True,
-    )
-    for task in tasks:
-        due_date = task.dueDate
-        notification_time = task.notificationTime
-        user = task.user
-        fromEmail = settings.DEFAULT_FROM_EMAIL
-        receiver_email = user.email
-        time_remaining = due_date - timezone.now()
-        if time_remaining.total_seconds() <= notification_time * 60:
-            task_link = "http://localhost:8000/tasks/running/"
-            task_title = task.taskTitle
-            task_link_html = f'<a href="{task_link}">{task_title}</a>'
-            todo_item_expire = (
-                f"Your task '{task_link_html}' will expire in {notification_time} minutes!"
-            )
-
-            html_content = f"""
-                <html>
-                <body>
-                    <p>{todo_item_expire}</p>
-                </body>
-                </html>
-            """
-
-            text_content = strip_tags(html_content)
-
-            email = EmailMultiAlternatives(
-                'Task Notification',
-                text_content,
-                fromEmail,
-                [receiver_email],
-            )
-            email.attach_alternative(html_content, "text/html")
-            
-            try:
-                email.send()
-                task.sent_reminder = True
-                task.save()
-
-                notifications = Notifications (
-                    name = f'Task "{task.taskTitle}" Notification Sent',
-                    date = timezone.now(),
-                    user = user,
-                )
-                notifications.notificationsCount += 1
-                notifications.save()
-            except:
-                notifications = Notifications (
-                    name = f'Task "{task.taskTitle}" Notification Sending Failed',
-                    date = timezone.now(),
-                    user = user,
-                )
-                notifications.notificationsCount += 1
-                notifications.save()
-                pass
-
-####### open thread in every 1 minute to change task status & send email for set tasks 
-notification_thread = threading.Thread(target=lambda: check_notification_time(60))
-notification_thread.start() 
 
 #######################this function shows all the running tasks of that user
 def running_tasks(request):

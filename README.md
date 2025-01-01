@@ -30,42 +30,98 @@ To get started with the Todo_List Django Web App, you can clone the repository f
 
    ```bash
    git clone https://github.com/NAHIAN-19/Todo-List-Django.git
-   
-2. Install the <a href="https://github.com/tschoonj/GTK-for-Windows-Runtime-Environment-Installer/releases/download/2022-01-04/gtk3-runtime-3.24.31-2022-01-04-ts-win64.exe">GTK Installer</a> ( To use weasyprint )
+   ```
 
-2. Navigate to the project folder:
+2. **Install the GTK Installer** (To use weasyprint):
+
+   [GTK Installer](https://github.com/tschoonj/GTK-for-Windows-Runtime-Environment-Installer/releases/download/2022-01-04/gtk3-runtime-3.24.31-2022-01-04-ts-win64.exe)
+
+3. **Navigate to the project folder**:
+
    ```bash
    cd Todo_List
-   
-3. Create and activate a virtual environment (optional but recommended):
+   ```
+
+4. **Create and activate a virtual environment** (optional but recommended):
+
    ```bash
-   py -m venv myworld
-   myworld\Scripts\activate.bat
-4. Install project dependencies:
+   python -m venv myworld
+   source myworld/bin/activate  # On Windows use: myworld\Scripts\activate.bat
+   ```
+
+5. **Install project dependencies**:
+
    ```bash
    pip install -r requirements.txt
-   
-5. Create a .env file in your project root & add keys:
+   ```
+
+6. **Create a .env file in your project root & add keys**:
+
    ```bash
    python generate_keys.py
+   ```
 
-6. Check .env file and follow the link for Email setup
-   <a href="https://www.geeksforgeeks.org/setup-sending-email-in-django-project/">Geekforgeeks email setup in django</a>
+7. **Install Redis**:
 
-7. Run database migrations:
+   - For Windows: Follow this guide to install Redis: [Install Redis on Windows](https://redis.io/docs/getting-started/installation/install-redis-on-windows/)
+   - For MacOS: Use Homebrew:
+
+     ```bash
+     brew install redis
+     ```
+
+   - For Linux: Use the following commands:
+
+     ```bash
+     sudo apt-get update
+     sudo apt-get install redis-server
+     ```
+
+   - Start Redis server:
+
+     - For Windows: Run `redis-server` from the Redis installation folder.
+     - For MacOS/Linux: Run the following:
+
+       ```bash
+       redis-server
+       ```
+
+8. **Check .env file and follow the link for Email setup**:
+
+   [Geekforgeeks email setup in django](https://www.geeksforgeeks.org/setup-sending-email-in-django-project/)
+
+9. **Start the Celery worker in one terminal window**:
+
    ```bash
-   python manage.py makemigrations
-   python manage.py migrate
-   
-8. Create a superuser account (for admin access)
-   ```bash
-   python manage.py createsuperuser
-   
-9. Start the development server:
-   ```bash
-   python manage.py runserver
-   
-10. Open your web browser and go to http://localhost:8000 to access the Todo_List Django Web App.
+   celery -A Todo_List worker --loglevel=info
+   ```
+
+   - Start the Celery Beat scheduler in another terminal window:
+
+     ```bash
+     celery -A Todo_List beat --loglevel=info
+     ```
+
+10. **Run database migrations**:
+
+    ```bash
+    python manage.py makemigrations
+    python manage.py migrate
+    ```
+
+11. **Create a superuser account (for admin access)**:
+
+    ```bash
+    python manage.py createsuperuser
+    ```
+
+12. **Start the development server**:
+
+    ```bash
+    python manage.py runserver
+    ```
+
+13. **Open your web browser and go to** [http://localhost:8000](http://localhost:8000) **to access the Todo_List Django Web App**.
 
 ## Features
 
@@ -73,13 +129,13 @@ The Todo_List Django Web App offers the following features:
 
 - **Task Management**: Easily add, edit, and delete tasks.
 - **Task Prioritization**: Assign priority levels to tasks.
-- **Task Categorization**: Divide tasks in different categories.
-- **Task Reminder**: Send Email to user for specific tasks.
-- **User Authentication**: Secure account management (signin,signup,forgot password).
+- **Task Categorization**: Divide tasks into different categories.
+- **Task Reminder**: Send Email to users for specific tasks (with Celery).
+- **User Authentication**: Secure account management (signin, signup, forgot password).
 - **Admin Dashboard**: Access admin dashboard [http://localhost:8000/todo-admin/](http://localhost:8000/todo-admin/) to manage users and tasks.
-- **Profile Managemet**: View/Change user details.
-- **Export Task Details**: Download PDF / CSV file of you tasks.
-- **Dark Mode**: Trigger Dark theme for awesome experience.
+- **Profile Management**: View/Change user details.
+- **Export Task Details**: Download PDF / CSV file of your tasks.
+- **Dark Mode**: Trigger Dark theme for an awesome experience.
 
 ## Contributing
 

@@ -25,6 +25,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'Todo_List_App',
+    'django_celery_results',
+    'django_celery_beat',
 ]
 
 MIDDLEWARE = [
@@ -119,3 +121,10 @@ EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
 
 DEFAULT_FROM_EMAIL = os.getenv('EMAIL_HOST_USER')
+
+
+CELERY_BROKER_URL = 'redis://localhost:6379/4'  # URL of the Redis broker
+CELERY_ACCEPT_CONTENT = ['json']               # Acceptable content formats
+CELERY_TASK_SERIALIZER = 'json'                # Serialization format
+CELERY_RESULT_BACKEND = 'redis://localhost:6379/4'            # Store results in the database
+CELERY_TIMEZONE = 'Asia/Dhaka'      
